@@ -36,7 +36,7 @@ def download(path):
     url = f'https://drive.google.com/uc?id={files[filename]}'
     gdown.download(url, path, quiet=False)
 
-def filter_quotes(path, keywords = [""], speakers = [""], chunksize = 1000, save = None, chunknum = None):
+def filter_quotes(path, keywords = {}, speakers = [""], chunksize = 1000, save = None, chunknum = None):
     """Filter a compressed dataset of quotes, with respect to some keywords and speakers. This function
     can be used to save the filtered heavy dataset into a light pickle file, by specifing a string name
     for the argument save.
@@ -59,7 +59,7 @@ def filter_quotes(path, keywords = [""], speakers = [""], chunksize = 1000, save
     Returns:
         pd.dataframe: Filtered panda dataframe
     """
-    assert (keywords != [""] and speakers !=  [""], "The keywords and speakers are empty lists, nothing to filter.")
+    assert (keywords != {} and speakers !=  [""], "The keywords and speakers are empty lists, nothing to filter.")
 
     if save != None:
         save_path = os.path.join("data/processed/", save+'.pkl')
@@ -76,7 +76,7 @@ def filter_quotes(path, keywords = [""], speakers = [""], chunksize = 1000, save
         print(f"INFO: {chunknum*chunksize} quotes will be inspected")
     else:
         iterator = tqdm(tp)
-
+ 
     for num, chunk in enumerate(iterator):
         if num == chunknum:
             break
@@ -84,10 +84,13 @@ def filter_quotes(path, keywords = [""], speakers = [""], chunksize = 1000, save
         # The idea here is to split the filter in two parts, where we want precise unique words in a quote,
         # and secondly we want a precise group of words (e.g. two words) in our quotes. This is done in the
         # following two steps.
+
         df_temp = pd.DataFrame(chunk, columns=chunk.keys())
         criteria_speakers = df_temp['speaker'].str.contains('|'.join(speakers))
         criteria_1 = df_temp["quotation"].str.split(" ").apply(lambda x : bool(set(x) & set(keywords["One word"])))
-        criteria_2 = df_temp["quotation"].apply(lambda x : bool(set(x) & set(keywords["Two words"])))
+        criteria_2 = df_temp["quotation"].apply( \
+            lambda x : bool(set(map(' '.join, zip(*(x.split(" ")[i:] for i in range(2))))) \
+             & set(keywords["Two words"])))
         # map(' '.join, zip(words[:-1], words[1:]))
         df_temp = df_temp[criteria_speakers | criteria_1 | criteria_2]
 
@@ -98,6 +101,8 @@ def filter_quotes(path, keywords = [""], speakers = [""], chunksize = 1000, save
 
     if save != None:
         df.to_pickle(save_path)
+    
+    print(f"INFO: {len(df)} citations have been kept.")
 
     return df
 
