@@ -1,0 +1,11 @@
+# Object file
+*.o
+*.bz2
+*.ipynb_checkpoints
+*.csv
+*.pyc
+*.vscode
+__pycache__
+
+# Ada Library Information
+*.ali
