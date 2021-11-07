@@ -81,9 +81,16 @@ def filter_quotes(path, keywords = [""], speakers = [""], chunksize = 1000, save
         if num == chunknum:
             break
 
+        # The idea here is to split the filter in two parts, where we want precise unique words in a quote,
+        # and secondly we want a precise group of words (e.g. two words) in our quotes. This is done in the
+        # following two steps.
         df_temp = pd.DataFrame(chunk, columns=chunk.keys())
-        df_temp = df_temp[df_temp['speaker'].str.contains('|'.join(speakers)) \
-                | df_temp["quotation"].str.split(" ").apply(lambda x : bool(set(x) & set(keywords)))]
+        criteria_speakers = df_temp['speaker'].str.contains('|'.join(speakers))
+        criteria_1 = df_temp["quotation"].str.split(" ").apply(lambda x : bool(set(x) & set(keywords["One word"])))
+        criteria_2 = df_temp["quotation"].apply(lambda x : bool(set(x) & set(keywords["Two words"])))
+        # map(' '.join, zip(words[:-1], words[1:]))
+        df_temp = df_temp[criteria_speakers | criteria_1 | criteria_2]
+
         if num == 0:
             df = df_temp
         else:
@@ -131,3 +138,21 @@ def load_quotes(path, limit = None, columns = None, low_memory = False):
             quotes.append(new_quote)
 
     return pd.DataFrame(quotes,columns=columns)
+
+
+"""
+keywords_1_word = ["apple", "iphone", "ipad", "imac", "ipod", "macbook", "mac", "airpods", \
+        "lightening", "magsafe", "aapl", "iwatch", "itunes", "homepod", "macos", "ios", "ipados", \
+        "watchos", "tvos", "wwdc", "siri", "facetime", "appstore", "icloud", "iphones"]
+
+keywords_2_words = ["apple watch", "steve jobs", "tim cook", "face id", \
+        "pro display xdr", "katherine adams", "eddy cue", "craig federighi"]
+
+keywords = {"One word": keywords_1_word, "Two words": keywords_2_words}
+
+speakers = ["steve jobs", "tim cook", "katherine adams", "eddy cue", "craig federighi", "john giannandrea", "greg joswiak", \
+    "sabih khan", "luca maestri", "deirdre o'brien", "johny srouji", "john ternus", "jeff williams", "lisa jakson", \
+    "stella low", "isabel ge mahe", "tor myhren", "adrian perica", "phil schiller", "arthur levinson", "james bell", \
+    "albert gore", "andrea jung", "monica lozano", "ronald sugar", "susan wagner"]
+    
+"""
