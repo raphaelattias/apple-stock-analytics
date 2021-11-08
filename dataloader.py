@@ -48,6 +48,7 @@ def download(path, filtered = False):
             'filtered_quotes_2016.pkl': '1SHUWidmpLJUdbD3uoPv1RT4TBw6_ID4H', \
             'filtered_quotes_2017.pkl': '1KNRHJvJyjZMSQm4F98rGs18zNnvxNdBR', \
             'filtered_quotes_2018.pkl': '1burATSHOF-bLgZmwY09upe9DcMPqgD0s', \
+            'filtered_quotes_2019.pkl': '1gr4Tk5WlOB_n-2i409XjWCSEIzvmsrDz', \
             'filtered_quotes_2020.pkl': '1ihiwu0nMJJCSCXQLyXZTyuY0YfR5ZY0i'}
 
 
