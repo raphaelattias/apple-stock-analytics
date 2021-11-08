@@ -11,7 +11,7 @@ import gdown
 # jupyter nbextension enable --py widgetsnbextension
 
 
-def download(path):
+def download(path, filtered = False):
     """Download the respective dataset from Gdrive
 
     Args:
@@ -19,20 +19,38 @@ def download(path):
     """
 
     filename = os.path.split(path)[-1]
-    files = { \
-        'quotes-2008.json.bz2': '1wIdrR0sUGw7gAKCo_S-iL3q_V04wHzrP', \
-        'quotes-2009.json.bz2': '1Wds32frDJ6PJgP1ruU2ctDvvlcOF4k3i', \
-        'quotes-2010.json.bz2': '1dUMLpB7rVRF3nY6X2GmVNO57Zm1RVZRB', \
-        'quotes-2011.json.bz2': '1sPlhxtt9VJROcaD97DmzHsFROGBOCpK6', \
-        'quotes-2012.json.bz2': '1M3arwVzCNz9n92wJVl9c3rTOU5oh1xFQ', \
-        'quotes-2013.json.bz2': '1PZEmS85TAHtNwXoMgm-7MDC58oS3cK73', \
-        'quotes-2014.json.bz2': '1axK0PRItbbQW4V-T1fDa3J75bKZJHVLI', \
-        'quotes-2015.json.bz2': '1ujF5vgppXUu5Ph81wqrwY12DrszVmCGe', \
-        'quotes-2016.json.bz2': '1iyYhemohtPBwFyWck8SMHdaHoJMZShsI', \
-        'quotes-2017.json.bz2': '1823mXyPsLDK7i1CQ7CtjzJaJ8rxeEulp', \
-        'quotes-2018.json.bz2': '1X609SehGUxgoB0LfwazAeySjWDc-VhcZ', \
-        'quotes-2019.json.bz2': '1KUXgpssbM7mXGx5RqturDKdtdS_KxIB8', \
-        'quotes-2020.json.bz2': '1kBPm86V1_9z-9rTi3F-ENgxGvUod0olI'}
+
+    if not filtered:
+        files = { \
+            'quotes-2008.json.bz2': '1wIdrR0sUGw7gAKCo_S-iL3q_V04wHzrP', \
+            'quotes-2009.json.bz2': '1Wds32frDJ6PJgP1ruU2ctDvvlcOF4k3i', \
+            'quotes-2010.json.bz2': '1dUMLpB7rVRF3nY6X2GmVNO57Zm1RVZRB', \
+            'quotes-2011.json.bz2': '1sPlhxtt9VJROcaD97DmzHsFROGBOCpK6', \
+            'quotes-2012.json.bz2': '1M3arwVzCNz9n92wJVl9c3rTOU5oh1xFQ', \
+            'quotes-2013.json.bz2': '1PZEmS85TAHtNwXoMgm-7MDC58oS3cK73', \
+            'quotes-2014.json.bz2': '1axK0PRItbbQW4V-T1fDa3J75bKZJHVLI', \
+            'quotes-2015.json.bz2': '1ujF5vgppXUu5Ph81wqrwY12DrszVmCGe', \
+            'quotes-2016.json.bz2': '1iyYhemohtPBwFyWck8SMHdaHoJMZShsI', \
+            'quotes-2017.json.bz2': '1823mXyPsLDK7i1CQ7CtjzJaJ8rxeEulp', \
+            'quotes-2018.json.bz2': '1X609SehGUxgoB0LfwazAeySjWDc-VhcZ', \
+            'quotes-2019.json.bz2': '1KUXgpssbM7mXGx5RqturDKdtdS_KxIB8', \
+            'quotes-2020.json.bz2': '1kBPm86V1_9z-9rTi3F-ENgxGvUod0olI'}
+    else:
+        files = { \
+            'filtered_quotes_2008.pkl': '1pmP2oz9S5W2t0ILVlUn27D9Ad3zSSTaS', \
+            'filtered_quotes_2009.pkl': '1U7bj4XTR9TAXckTBk7LnwVmk2_RLcIDg', \
+            'filtered_quotes_2010.pkl': '1PykPkem69dAhzsfqZJeoC48XDEIsWlnA', \
+            'filtered_quotes_2011.pkl': '1M07hp-Pxqab3lwxs_2eUiR3YZGZSnmiO', \
+            'filtered_quotes_2012.pkl': '1stTLHJeY_W48L9QPuJuYD-4MHIlahKLa', \
+            'filtered_quotes_2013.pkl': '1LyNfF6M6QK7G8n-mYO_-RJ6QPOHVFGqn', \
+            'filtered_quotes_2014.pkl': '13fk6lVH3kOwCI5t_HiiByozcMipMszsD', \
+            'filtered_quotes_2015.pkl': '1WJ2D2RJrcR67KeDUzKzGqKourxyX2V3u', \
+            'filtered_quotes_2016.pkl': '1SHUWidmpLJUdbD3uoPv1RT4TBw6_ID4H', \
+            'filtered_quotes_2017.pkl': '1KNRHJvJyjZMSQm4F98rGs18zNnvxNdBR', \
+            'filtered_quotes_2018.pkl': '1burATSHOF-bLgZmwY09upe9DcMPqgD0s', \
+            'filtered_quotes_2020.pkl': '1ihiwu0nMJJCSCXQLyXZTyuY0YfR5ZY0i'}
+
+
     url = f'https://drive.google.com/uc?id={files[filename]}'
     gdown.download(url, path, quiet=False)
 
@@ -113,7 +131,7 @@ def filter_quotes(path, keywords = {}, speakers = [""], chunksize = 1000, save =
 
     return {"dataframe": df, "kept": len(df), "total": total_nb}
 
-def load_quotes(path, limit = None, columns = None, low_memory = False):
+def load_quotes(year, limit = None, columns = None, filtered = False):
     """Function to load the quotes of a compressed json file into a pd.DataFrame
 
     Args:
@@ -129,27 +147,33 @@ def load_quotes(path, limit = None, columns = None, low_memory = False):
             ['quoteID', 'quotation', 'speaker', 'qids', 'date', 'numOccurences', 'probas', 'urls', 'phase']
     """
 
-    path = os.path.join(os.getcwd(),path)
+    if filtered:
+        path = os.path.join(os.getcwd(),'data/processed/',f"filtered_quotes_{str(year)}.pkl")
+    else:
+        path = os.path.join(os.getcwd(),'data/',f"quotes-{str(year)}.json.bz2")
+
     if not os.path.isfile(path):
-        download(path)
+        download(path,filtered)
 
+    if filtered:
+        df = pd.read_pickle(path)
+    else:
+        with bz2.open(path, "rt", encoding = "utf8") as bzinput:
+            quotes = []
+            for i, line in enumerate(bzinput):
+                if limit != None and i == limit: break
 
-    with bz2.open(path, "rt", encoding = "utf8") as bzinput:
-        quotes = []
-        for i, line in enumerate(bzinput):
-            if limit != None and i == limit: break
+                quote = json.loads(line)
 
-            quote = json.loads(line)
-
-            if columns == None:
-                columns = list(quote.keys())
-                
-            new_quote = []
-            for col in columns:
-                new_quote.append(quote[col])
-            quotes.append(new_quote)
-
-    return pd.DataFrame(quotes,columns=columns)
+                if columns == None:
+                    columns = list(quote.keys())
+                    
+                new_quote = []
+                for col in columns:
+                    new_quote.append(quote[col])
+                quotes.append(new_quote)
+        df = pd.DataFrame(quotes,columns=columns)
+    return df
 
 
 """
