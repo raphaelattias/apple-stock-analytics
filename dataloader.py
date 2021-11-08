@@ -77,6 +77,7 @@ def filter_quotes(path, keywords = {}, speakers = [""], chunksize = 1000, save =
     else:
         iterator = tqdm(tp)
  
+    total_nb = 0
     for num, chunk in enumerate(iterator):
         if num == chunknum:
             break
@@ -86,13 +87,19 @@ def filter_quotes(path, keywords = {}, speakers = [""], chunksize = 1000, save =
         # following two steps.
 
         df_temp = pd.DataFrame(chunk, columns=chunk.keys())
+
+        total_nb += len(df_temp)
+
         criteria_speakers = df_temp['speaker'].apply(lambda x : x.lower()).str.contains('|'.join(speakers))
         criteria_1 = df_temp["quotation"].apply(lambda x : x.lower()).str.split(" ").apply(lambda x : bool(set(x) & set(keywords["One word"])))
         criteria_2 = df_temp["quotation"].apply( \
             lambda x : bool(set(map(' '.join, zip(*(x.lower().split(" ")[i:] for i in range(2))))) \
              & set(keywords["Two words"])))
-        # map(' '.join, zip(words[:-1], words[1:]))
-        df_temp = df_temp[criteria_speakers | criteria_1 | criteria_2]
+        criteria_3 = df_temp["quotation"].str.split(" ").apply(lambda x : bool(set(x) & set(keywords["Capital words"])))
+        criteria_black_list = df_temp["quotation"].apply( lambda x : bool(set(map(' '.join, zip(*(x.split(" ")[i:] for i in range(2))))) \
+             & set(keywords["Black list"])))
+    
+        df_temp = df_temp[(criteria_speakers | criteria_1 | criteria_2 | criteria_3) & (~criteria_black_list)]
 
         if num == 0:
             df = df_temp
@@ -102,9 +109,9 @@ def filter_quotes(path, keywords = {}, speakers = [""], chunksize = 1000, save =
     if save != None:
         df.to_pickle(save_path)
     
-    print(f"INFO: {len(df)} citations have been kept.")
+    print(f"INFO: {len(df)} citations have been kept over ", total_nb, " total number of citations.")
 
-    return df
+    return {"dataframe": df, "kept": len(df), "total": total_nb}
 
 def load_quotes(path, limit = None, columns = None, low_memory = False):
     """Function to load the quotes of a compressed json file into a pd.DataFrame
