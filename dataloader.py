@@ -78,7 +78,7 @@ def filter_quotes(path, keywords = {}, speakers = [""], chunksize = 1000, save =
     Returns:
         pd.dataframe: Filtered panda dataframe
     """
-    print("gaspard")
+    print("raphael")
     assert (keywords != {} and speakers !=  [""], "The keywords and speakers are empty lists, nothing to filter.")
 
     if save != None:
