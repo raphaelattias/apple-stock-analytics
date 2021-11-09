@@ -67,7 +67,7 @@ def filter_quotes(path, keywords = {}, speakers = [""], chunksize = 1000, save =
             print(f"WARNING: the file {save_path} already exists and will be deleted at the end.")
     path = os.path.join(os.getcwd(),path)
     if not os.path.isfile(path):
-        download(path)
+        download(path, 'unprocessed quotes')
 
     tp = pd.read_json(path, lines= True, chunksize=chunksize)
 
@@ -117,7 +117,7 @@ def filter_quotes(path, keywords = {}, speakers = [""], chunksize = 1000, save =
 # ----------------------------------------------------------------- #
 
 
-def load_quotes(year, limit = None, columns = None, filtered = False):
+def load_quotes(year, category, limit = None, columns = None):
     """Function to load the quotes of a compressed json file into a pd.DataFrame
 
     Args:
@@ -133,17 +133,20 @@ def load_quotes(year, limit = None, columns = None, filtered = False):
             ['quoteID', 'quotation', 'speaker', 'qids', 'date', 'numOccurences', 'probas', 'urls', 'phase']
     """
 
-    if filtered:
+    if category == 'processed quotes':
         path = os.path.join(os.getcwd(),'data/processed_quotes/',f"filtered_quotes_{str(year)}.pkl")
-    else:
+    elif category == 'unprocessed quotes':
         path = os.path.join(os.getcwd(),'data/unprocessed_quotes/',f"quotes-{str(year)}.json.bz2")
+    else:
+        print('ERROR: For this load_quotes function, category variable can be either \
+                         -- unprocessed quotes -- or -- processed quotes --. ')
 
     if not os.path.isfile(path):
-        download(path,filtered)
+        download(path, category)
 
-    if filtered:
+    if category == 'processed quotes':
         df = pd.read_pickle(path)
-    else:
+    elif category == 'unprocessed quotes':
         with bz2.open(path, "rt", encoding = "utf8") as bzinput:
             quotes = []
             for i, line in enumerate(bzinput):
@@ -169,7 +172,7 @@ def get_dictionnary():
 
     # Dictionnary
     files = {
-        'unprocessed data': {
+        'unprocessed quotes': {
             'quotes-2008.json.bz2': '1wIdrR0sUGw7gAKCo_S-iL3q_V04wHzrP',
             'quotes-2009.json.bz2': '1Wds32frDJ6PJgP1ruU2ctDvvlcOF4k3i',
             'quotes-2010.json.bz2': '1dUMLpB7rVRF3nY6X2GmVNO57Zm1RVZRB',
@@ -184,7 +187,7 @@ def get_dictionnary():
             'quotes-2019.json.bz2': '1KUXgpssbM7mXGx5RqturDKdtdS_KxIB8',
             'quotes-2020.json.bz2': '1kBPm86V1_9z-9rTi3F-ENgxGvUod0olI'
         },
-        'processed data': {
+        'processed quotes': {
             'filtered_quotes_2008.pkl': '1pmP2oz9S5W2t0ILVlUn27D9Ad3zSSTaS',
             'filtered_quotes_2009.pkl': '1U7bj4XTR9TAXckTBk7LnwVmk2_RLcIDg',
             'filtered_quotes_2010.pkl': '1PykPkem69dAhzsfqZJeoC48XDEIsWlnA',
