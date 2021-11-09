@@ -1,52 +1,56 @@
 import yfinance as yf
 import matplotlib.pyplot as plt
+import pandas as pd
 import seaborn as sns
 import matplotlib
 import numpy as np
 import warnings
 warnings.simplefilter(action='ignore')
 
-def stock(stock_name):
-  print("We first load the dataset")
-  stock = yf.Ticker(stock_name).history(start='2019-01-01', end='2019-12-31')
+def stock(stock_name, year = 2020, fig = "price_volume"):
+  assert fig in ["price_volume", "daily_diff", "volume"]
+
+  stock = yf.download(stock_name, start=f'{year}-01-01', end=f'{year}-12-31', progress = False)
   stock.reset_index(inplace=True)
 
-  print(stock)
+  if fig == "price_volume":
+    quantile_volume = np.quantile(stock['Volume'],0.95)
 
-  print("We observe the stock price and volume during the year")
+    ax1 = sns.set_style(style="white", rc=None )
+    fig, ax1 = plt.subplots(figsize=(12,6))
 
-  ax1 = sns.set_style(style="white", rc=None )
-  fig, ax1 = plt.subplots(figsize=(12,6))
+    sns.lineplot(data = stock['Open'], sort = False, ax=ax1)
+    ax2 = ax1.twinx()
 
-  sns.lineplot(data = stock['Open'], sort = False, ax=ax1)
-  ax2 = ax1.twinx()
-  sns.barplot(y = stock['Volume'], x = stock['Date'],  alpha=0.3, ax=ax2, color="Green")
-  x_dates = stock['Date'].dt.strftime('%Y-%m').sort_values().unique()
-  plt.title(f"Daily stock price and volume for the ${stock_name} stock.")
-  ax1.xaxis.set_major_locator(matplotlib.dates.AutoDateLocator())
-  ax1.set_xticklabels(labels = x_dates, rotation=45, ha='right')
-  plt.show()
-  print("We can also observe the distribution of the volume and daily price difference between\
-    Open and Closing of the market.")
+    sns.barplot(y = stock['Volume'], x = stock['Date'],  alpha=0.3, ax=ax2, color="Green")
 
-  stock['Daily Diff']=(stock['Close']-stock['Open'])*100/stock['Open']
-  fig, ax3 = plt.subplots(figsize=(12,6))
-  stock['Daily Diff'].plot.hist(bins=30, ax=ax3)
-  plt.title(f"Histogram of the daily difference between opening and closing price for the ${stock_name} stock.")
-  plt.xlabel("Percentage difference between the closing and opening price")
-  plt.show()
+    plt.title(f"Daily stock price and volume for the ${stock_name} stock.")
 
-  fig, ax4 = plt.subplots(figsize=(12,6))
-  stock['Volume'].plot.hist(bins=30, ax=ax4)
-  plt.title(f"Histogram of the daily volume for the ${stock_name} stock.")
-  plt.xlabel("Daily volume of exchange")
-  plt.show()
+    ax1.xaxis.set_major_locator(matplotlib.dates.AutoDateLocator())
+    x_dates = stock['Date'].dt.strftime('%Y-%m').sort_values().unique()
+    ax1.set_xticklabels(labels = x_dates, rotation=45, ha='right')
 
-def compare(stock1_name, stock2_name):
-  print("We observe the stock price during the year")
-  stock1 = yf.Ticker(stock1_name).history(start='2019-01-01', end='2019-12-31')
+    plt.show()
+
+  elif fig == "daily_diff":
+    stock['Daily Diff']=(stock['Close']-stock['Open'])*100/stock['Open']
+    fig, ax3 = plt.subplots(figsize=(12,6))
+    stock['Daily Diff'].plot.hist(bins=30, ax=ax3)
+    plt.title(f"Histogram of the daily difference between opening and closing price for the ${stock_name} stock in {year}.")
+    plt.xlabel("Percentage difference between the closing and opening price")
+    plt.show()
+
+  elif fig == "volume":
+    fig, ax4 = plt.subplots(figsize=(12,6))
+    stock['Volume'].plot.hist(bins=30, ax=ax4)
+    plt.title(f"Histogram of the daily volume for the ${stock_name} stock in {year}.")
+    plt.xlabel("Daily volume of exchange")
+    plt.show()
+
+def compare(stock1_name, stock2_name, year = 2020):
+  stock1 = yf.download(stock1_name, start=f'{year}-01-01', end=f'{year}-12-31', progress = False)
   stock1.reset_index(inplace=True)
-  stock2 = yf.Ticker(stock2_name).history(start='2019-01-01', end='2019-12-31')
+  stock2 = yf.download(stock2_name, start=f'{year}-01-01', end=f'{year}-12-31', progress = False)
   stock2.reset_index(inplace=True)
 
   fig, ax = plt.subplots(figsize=(12,6))
@@ -58,8 +62,6 @@ def compare(stock1_name, stock2_name):
   ax.xaxis.set_major_locator(matplotlib.dates.AutoDateLocator())
   ax.set_xticklabels(labels = x_dates, rotation=45, ha='right')
   plt.show()
-
-  print("Volume")
 
   fig, ax = plt.subplots(figsize=(12,6))
   sns.barplot(y = stock1['Volume'], x = stock1['Date'],  alpha=1, ax=ax, color="Red")
@@ -75,7 +77,6 @@ def compare(stock1_name, stock2_name):
   ax.set_xticklabels(labels = x_dates, rotation=45, ha='right')
   plt.show()
 
-  print("histogram")
   stock1['Daily Diff']=(stock1['Close']-stock1['Open'])*100/stock1['Open']
   stock2['Daily Diff']=(stock2['Close']-stock2['Open'])*100/stock2['Open']
   fig, ax = plt.subplots(figsize=(12,6))
