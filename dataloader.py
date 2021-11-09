@@ -11,49 +11,29 @@ import gdown
 # jupyter nbextension enable --py widgetsnbextension
 
 
-def download(path, filtered = False):
+# ----------------------------------------------------------------- #
+
+
+def download(path, category):
     """Download the respective dataset from Gdrive
 
     Args:
         path (string): Path to the dataset.
     """
 
+    # Get the file name of what we are looking for
     filename = os.path.split(path)[-1]
 
-    if not filtered:
-        files = { \
-            'quotes-2008.json.bz2': '1wIdrR0sUGw7gAKCo_S-iL3q_V04wHzrP', \
-            'quotes-2009.json.bz2': '1Wds32frDJ6PJgP1ruU2ctDvvlcOF4k3i', \
-            'quotes-2010.json.bz2': '1dUMLpB7rVRF3nY6X2GmVNO57Zm1RVZRB', \
-            'quotes-2011.json.bz2': '1sPlhxtt9VJROcaD97DmzHsFROGBOCpK6', \
-            'quotes-2012.json.bz2': '1M3arwVzCNz9n92wJVl9c3rTOU5oh1xFQ', \
-            'quotes-2013.json.bz2': '1PZEmS85TAHtNwXoMgm-7MDC58oS3cK73', \
-            'quotes-2014.json.bz2': '1axK0PRItbbQW4V-T1fDa3J75bKZJHVLI', \
-            'quotes-2015.json.bz2': '1ujF5vgppXUu5Ph81wqrwY12DrszVmCGe', \
-            'quotes-2016.json.bz2': '1iyYhemohtPBwFyWck8SMHdaHoJMZShsI', \
-            'quotes-2017.json.bz2': '1823mXyPsLDK7i1CQ7CtjzJaJ8rxeEulp', \
-            'quotes-2018.json.bz2': '1X609SehGUxgoB0LfwazAeySjWDc-VhcZ', \
-            'quotes-2019.json.bz2': '1KUXgpssbM7mXGx5RqturDKdtdS_KxIB8', \
-            'quotes-2020.json.bz2': '1kBPm86V1_9z-9rTi3F-ENgxGvUod0olI'}
-    else:
-        files = { \
-            'filtered_quotes_2008.pkl': '1pmP2oz9S5W2t0ILVlUn27D9Ad3zSSTaS', \
-            'filtered_quotes_2009.pkl': '1U7bj4XTR9TAXckTBk7LnwVmk2_RLcIDg', \
-            'filtered_quotes_2010.pkl': '1PykPkem69dAhzsfqZJeoC48XDEIsWlnA', \
-            'filtered_quotes_2011.pkl': '1M07hp-Pxqab3lwxs_2eUiR3YZGZSnmiO', \
-            'filtered_quotes_2012.pkl': '1stTLHJeY_W48L9QPuJuYD-4MHIlahKLa', \
-            'filtered_quotes_2013.pkl': '1LyNfF6M6QK7G8n-mYO_-RJ6QPOHVFGqn', \
-            'filtered_quotes_2014.pkl': '13fk6lVH3kOwCI5t_HiiByozcMipMszsD', \
-            'filtered_quotes_2015.pkl': '1WJ2D2RJrcR67KeDUzKzGqKourxyX2V3u', \
-            'filtered_quotes_2016.pkl': '1SHUWidmpLJUdbD3uoPv1RT4TBw6_ID4H', \
-            'filtered_quotes_2017.pkl': '1KNRHJvJyjZMSQm4F98rGs18zNnvxNdBR', \
-            'filtered_quotes_2018.pkl': '1burATSHOF-bLgZmwY09upe9DcMPqgD0s', \
-            'filtered_quotes_2019.pkl': '1gr4Tk5WlOB_n-2i409XjWCSEIzvmsrDz', \
-            'filtered_quotes_2020.pkl': '1ihiwu0nMJJCSCXQLyXZTyuY0YfR5ZY0i'}
+    # Get the dictionnary of all the file adresses from our google drive
+    files = get_dictionnary()
 
 
-    url = f'https://drive.google.com/uc?id={files[filename]}'
+    url = f'https://drive.google.com/uc?id={files[category][filename]}'
     gdown.download(url, path, quiet=False)
+
+
+# ----------------------------------------------------------------- #
+
 
 def filter_quotes(path, keywords = {}, speakers = [""], chunksize = 1000, save = None, chunknum = None):
     """Filter a compressed dataset of quotes, with respect to some keywords and speakers. This function
@@ -133,6 +113,10 @@ def filter_quotes(path, keywords = {}, speakers = [""], chunksize = 1000, save =
 
     return {"dataframe": df, "kept": len(df), "total": total_nb}
 
+
+# ----------------------------------------------------------------- #
+
+
 def load_quotes(year, limit = None, columns = None, filtered = False):
     """Function to load the quotes of a compressed json file into a pd.DataFrame
 
@@ -150,9 +134,9 @@ def load_quotes(year, limit = None, columns = None, filtered = False):
     """
 
     if filtered:
-        path = os.path.join(os.getcwd(),'data/processed/',f"filtered_quotes_{str(year)}.pkl")
+        path = os.path.join(os.getcwd(),'data/processed_quotes/',f"filtered_quotes_{str(year)}.pkl")
     else:
-        path = os.path.join(os.getcwd(),'data/',f"quotes-{str(year)}.json.bz2")
+        path = os.path.join(os.getcwd(),'data/unprocessed_quotes/',f"quotes-{str(year)}.json.bz2")
 
     if not os.path.isfile(path):
         download(path,filtered)
@@ -178,19 +162,62 @@ def load_quotes(year, limit = None, columns = None, filtered = False):
     return df
 
 
-"""
-keywords_1_word = ["apple", "iphone", "ipad", "imac", "ipod", "macbook", "mac", "airpods", \
-        "lightening", "magsafe", "aapl", "iwatch", "itunes", "homepod", "macos", "ios", "ipados", \
-        "watchos", "tvos", "wwdc", "siri", "facetime", "appstore", "icloud", "iphones"]
+# ----------------------------------------------------------------- #
 
-keywords_2_words = ["apple watch", "steve jobs", "tim cook", "face id", \
-        "pro display xdr", "katherine adams", "eddy cue", "craig federighi"]
 
-keywords = {"One word": keywords_1_word, "Two words": keywords_2_words}
+def get_dictionnary():
 
-speakers = ["steve jobs", "tim cook", "katherine adams", "eddy cue", "craig federighi", "john giannandrea", "greg joswiak", \
-    "sabih khan", "luca maestri", "deirdre o'brien", "johny srouji", "john ternus", "jeff williams", "lisa jakson", \
-    "stella low", "isabel ge mahe", "tor myhren", "adrian perica", "phil schiller", "arthur levinson", "james bell", \
-    "albert gore", "andrea jung", "monica lozano", "ronald sugar", "susan wagner"]
-    
-"""
+    # Dictionnary
+    files = {
+        'unprocessed data': {
+            'quotes-2008.json.bz2': '1wIdrR0sUGw7gAKCo_S-iL3q_V04wHzrP',
+            'quotes-2009.json.bz2': '1Wds32frDJ6PJgP1ruU2ctDvvlcOF4k3i',
+            'quotes-2010.json.bz2': '1dUMLpB7rVRF3nY6X2GmVNO57Zm1RVZRB',
+            'quotes-2011.json.bz2': '1sPlhxtt9VJROcaD97DmzHsFROGBOCpK6',
+            'quotes-2012.json.bz2': '1M3arwVzCNz9n92wJVl9c3rTOU5oh1xFQ',
+            'quotes-2013.json.bz2': '1PZEmS85TAHtNwXoMgm-7MDC58oS3cK73',
+            'quotes-2014.json.bz2': '1axK0PRItbbQW4V-T1fDa3J75bKZJHVLI',
+            'quotes-2015.json.bz2': '1ujF5vgppXUu5Ph81wqrwY12DrszVmCGe',
+            'quotes-2016.json.bz2': '1iyYhemohtPBwFyWck8SMHdaHoJMZShsI',
+            'quotes-2017.json.bz2': '1823mXyPsLDK7i1CQ7CtjzJaJ8rxeEulp',
+            'quotes-2018.json.bz2': '1X609SehGUxgoB0LfwazAeySjWDc-VhcZ',
+            'quotes-2019.json.bz2': '1KUXgpssbM7mXGx5RqturDKdtdS_KxIB8',
+            'quotes-2020.json.bz2': '1kBPm86V1_9z-9rTi3F-ENgxGvUod0olI'
+        },
+        'processed data': {
+            'filtered_quotes_2008.pkl': '1pmP2oz9S5W2t0ILVlUn27D9Ad3zSSTaS',
+            'filtered_quotes_2009.pkl': '1U7bj4XTR9TAXckTBk7LnwVmk2_RLcIDg',
+            'filtered_quotes_2010.pkl': '1PykPkem69dAhzsfqZJeoC48XDEIsWlnA',
+            'filtered_quotes_2011.pkl': '1M07hp-Pxqab3lwxs_2eUiR3YZGZSnmiO',
+            'filtered_quotes_2012.pkl': '1stTLHJeY_W48L9QPuJuYD-4MHIlahKLa',
+            'filtered_quotes_2013.pkl': '1LyNfF6M6QK7G8n-mYO_-RJ6QPOHVFGqn',
+            'filtered_quotes_2014.pkl': '13fk6lVH3kOwCI5t_HiiByozcMipMszsD',
+            'filtered_quotes_2015.pkl': '1WJ2D2RJrcR67KeDUzKzGqKourxyX2V3u',
+            'filtered_quotes_2016.pkl': '1SHUWidmpLJUdbD3uoPv1RT4TBw6_ID4H',
+            'filtered_quotes_2017.pkl': '1KNRHJvJyjZMSQm4F98rGs18zNnvxNdBR',
+            'filtered_quotes_2018.pkl': '1burATSHOF-bLgZmwY09upe9DcMPqgD0s',
+            'filtered_quotes_2019.pkl': '1gr4Tk5WlOB_n-2i409XjWCSEIzvmsrDz',
+            'filtered_quotes_2020.pkl': '1ihiwu0nMJJCSCXQLyXZTyuY0YfR5ZY0i'
+        }, 
+        'wiki speakers attributes': {
+            'part-00000-0d587965-3d8f-41ce-9771-5b8c9024dce9-c000.snappy': '1S5EJgUwjw8QknkjUAjEO7FUvIQQZXong',
+            'part-00001-0d587965-3d8f-41ce-9771-5b8c9024dce9-c000.snappy': '1qAr9dICWbkEtzTx9jyseg8p1gMd-5qQz',
+            'part-00002-0d587965-3d8f-41ce-9771-5b8c9024dce9-c000.snappy': '12MPMK63m5Xa4XM5D360Hg315wfSUu9pn',
+            'part-00003-0d587965-3d8f-41ce-9771-5b8c9024dce9-c000.snappy': '13y6Oh6s6FEOnmehNKqRULBekDfRHffYH',
+            'part-00004-0d587965-3d8f-41ce-9771-5b8c9024dce9-c000.snappy': '1L2ci2rrMPNuVmoOwZ9pYkmwc9w4MEn_M',
+            'part-00005-0d587965-3d8f-41ce-9771-5b8c9024dce9-c000.snappy': '16bqF0FuoV0QLG7vYgeR638Q4gINMcI42',
+            'part-00006-0d587965-3d8f-41ce-9771-5b8c9024dce9-c000.snappy': '10tIX5WCxyBaZIEm3WgoK1uKIt5RQ1nkZ',
+            'part-00007-0d587965-3d8f-41ce-9771-5b8c9024dce9-c000.snappy': '1JhqpUiPUWwdTRIv-rbn0IaG0Y1j5SaJJ',
+            'part-00008-0d587965-3d8f-41ce-9771-5b8c9024dce9-c000.snappy': '1IKbPyYxyw8Lewe9Q6ifWVsKneihUIpdW',
+            'part-00009-0d587965-3d8f-41ce-9771-5b8c9024dce9-c000.snappy': '1noGdzogNAvgEQYgBO-c0-CO-jSpD-upp',
+            'part-00010-0d587965-3d8f-41ce-9771-5b8c9024dce9-c000.snappy': '1POA0IgDCv7bJLNp7vdfGBxucEYQWoy68',
+            'part-00011-0d587965-3d8f-41ce-9771-5b8c9024dce9-c000.snappy': '1fYRTQRmvrIwQigOMPqukW6_LMpq74AaU',
+            'part-00012-0d587965-3d8f-41ce-9771-5b8c9024dce9-c000.snappy': '1lskprayUi9mB1U12fDpd2wsklwhV4g5r',
+            'part-00013-0d587965-3d8f-41ce-9771-5b8c9024dce9-c000.snappy': '15d1Xb7aLhQ_tJ_Mc9O5O5NuRlkvZd1Ar',
+            'part-00014-0d587965-3d8f-41ce-9771-5b8c9024dce9-c000.snappy': '1ciVEdCJdJ-ymSpEr1x9Xg3yQvXaug56k',
+            'part-00015-0d587965-3d8f-41ce-9771-5b8c9024dce9-c000.snappy': '1DSYYRitpC3NwEL0S5uijas0QRXrH505E'
+        }
+    }
+
+    # Return the final files
+    return files
