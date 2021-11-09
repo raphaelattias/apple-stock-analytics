@@ -1,4 +1,4 @@
-# Apple Stock Market (title to modify)
+# Influence of the Media on Apple Stock Market
 
 ### Abstract
 
