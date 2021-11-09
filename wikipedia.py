@@ -3,11 +3,14 @@
 
 # ----------------------------------------------------------------- #
 
+
 # Import all the libraries
 import pandas as pd
 import numpy as np
 
+
 # ----------------------------------------------------------------- #
+
 
 # This function is use to transform all the qids in the datafram to 
 # a string fromat.
@@ -15,7 +18,9 @@ def pandas_process(input):
     output = str(input)
     return output
 
+
 # ----------------------------------------------------------------- #
+
 
 # This function is here to get all the ID of the different speakers in 
 # the wiki data set. The idea is to have list of all the personb that
