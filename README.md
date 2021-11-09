@@ -15,17 +15,22 @@ Apple has been a market leader in the world of technology ever since the launch 
 
 ### Proposed timeline : 
 **Week 8 :** *(12/11 : Milestone P2 due)*
+
 **Week 9 :** Begin subtask 1 and 2 (What is the role of the media coverage in explaining stock market fluctuations ? And who are the individuals who have influence over potential customers, and do these influencers have an impact on the Apple company image and eventually, on the stock market ?)
+
 **Week 10 :** Finish subtask 1 and 2. *(26/11 : HW2 due)* 
+
 **Week 11 :** Do subtask 3 (What is the influence of the public opinions or emotions about Apple expressed in the media on the stock market ?) 
+
 **Week 12 :** Create a website with interactive graphs for our data story. Write the README. 
+
 **Week 13 :** Finalize the website, the notebook, the code architecture and the README. *(17/12 : Milestone P3 due)*
 
 ### Organization within the team : 
-* Baptiste : Quotebank EDA and filtering (Week 8 P2), task 1 (Week 9-10), task 3 (Week 11), finalize the website (Week 12-13)
-* Camille : Quotebank EDA and filtering (Week 8 P2), task 2 (Week 9-10), Writing up the README and the datastory for the website (Week 11-12-13)
-* Gaspard : Wikipedia API recover the annual number of page views for each speaker (Week 8 M2, Week 9), task 2 (Week 9-10), task 3  (Week 11), finalize the website (Week 12-13)
-* Raphaël : Yahoo Finance API EDA and filtering (Week 8 P2), task 1 (Week 9-10), create the website (Week 11-12)
+* Baptiste Hernette [@Bapitou] (https://github.com/Bapitou) : Quotebank EDA and filtering (Week 8 P2), task 1 (Week 9-10), task 3 (Week 11), finalize the website (Week 12-13)
+* Camille Frayssinhes [@camillefrayssinhes](https://github.com/camillefrayssinhes): Quotebank EDA and filtering (Week 8 P2), task 2 (Week 9-10), Writing up the README and the datastory for the website (Week 11-12-13)
+* Gaspard Villa [@gaspardvilla] (https://github.com/gaspardvilla): Wikipedia API recover the annual number of page views for each speaker (Week 8 M2, Week 9), task 2 (Week 9-10), task 3  (Week 11), finalize the website (Week 12-13)
+* Raphaël Attias [@raphaelattias] (https://github.com/raphaelattias) : Yahoo Finance API EDA and filtering (Week 8 P2), task 1 (Week 9-10), create the website (Week 11-12)
 
 
 
