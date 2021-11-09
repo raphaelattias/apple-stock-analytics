@@ -14,8 +14,6 @@ def stock(stock_name, year = 2020, fig = "price_volume"):
   stock.reset_index(inplace=True)
 
   if fig == "price_volume":
-    quantile_volume = np.quantile(stock['Volume'],0.95)
-
     ax1 = sns.set_style(style="white", rc=None )
     fig, ax1 = plt.subplots(figsize=(12,6))
 
