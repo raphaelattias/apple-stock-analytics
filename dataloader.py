@@ -168,6 +168,46 @@ def load_quotes(year, category, limit = None, columns = None):
 # ----------------------------------------------------------------- #
 
 
+# The idea here is to concatenated in one single dataframe all the
+# filtered quotes.
+def get_filtered_quotes():
+
+    # Initialize a list
+    filtered_quotes = []
+
+    # Initialize the category
+    category = 'processed quotes'
+
+    # Initialize the path
+    path = 'data/processed_quotes/'
+    path = os.path.join(os.getcwd(), path)
+
+    # Get the filtered quotes dictionnary
+    filt_quotes_dict = get_dictionnary()[category]
+
+    # Get a loop over all the filtered quotes
+    for key in filt_quotes_dict:
+        
+        # Get the path where the pkl filtered quotes file is
+        current_path = os.path.join(path, key)
+
+        # Check wether the file is download or not
+        if not os.path.isfile(current_path):
+            download(current_path, category)
+
+        # Append in the list the current filtered quotes
+        filtered_quotes.append(pd.read_pickle(current_path))
+
+    # Concatenation
+    filtered_quotes = pd.concat(filtered_quotes)
+
+    # Return the results
+    return filtered_quotes
+
+
+# ----------------------------------------------------------------- #
+
+
 def get_dictionnary():
 
     # Dictionnary

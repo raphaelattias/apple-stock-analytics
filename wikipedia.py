@@ -39,10 +39,10 @@ def get_wiki_ids(quotes):
     quotes_ID = quotes_ID.drop_duplicates(['qids'])
 
     # Get the list of ID's
-    wiki_ids = quotes_ID['qids']
+    quotes_ID = quotes_ID['qids']
 
     # Return the result
-    return wiki_ids
+    return quotes_ID
 
 
 # ----------------------------------------------------------------- #
@@ -55,6 +55,8 @@ def concat_wiki_files():
     
     # Initialization of the files variable
     files = []
+
+    # Initailize the category
     category = 'wiki speakers attributes'
 
     # Initialize the path
@@ -62,11 +64,10 @@ def concat_wiki_files():
     path = os.path.join(os.getcwd(), path)
 
     # Get the dictionniary conatining all the adresses
-    wiki_dict = get_dictionnary()['wiki speakers attributes']
+    wiki_dict = get_dictionnary()[category]
 
     # Loop over all the wiki files containing speaker attributes
     for key in wiki_dict:
-        print(key)
         
         # Get the path of the current file
         current_path = os.path.join(path, key)
