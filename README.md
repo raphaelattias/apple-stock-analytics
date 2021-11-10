@@ -41,6 +41,7 @@ Apple has been a market leader in the world of technology ever since the launch 
 ### Code Architecture
 #### Quotebank 
 `dataloader.py` : loading and filtering the quotebank dataset according to our needs 
+
 `quotebankexploration.py` : performing EDA of the quotebank dataset before and after filtering 
 #### Yahoo Finance 
 `finance.py` : performing EDA of the Yahoo Finance dataset 
