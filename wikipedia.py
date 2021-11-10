@@ -23,6 +23,7 @@ def pandas_process(input):
 
 # ----------------------------------------------------------------- #
 
+''' !!! TO SUPRESS !!! '''
 
 # This function is here to get all the ID of the different speakers in 
 # the wiki data set. The idea is to have list of all the personb that
@@ -40,6 +41,7 @@ def get_wiki_ids(quotes):
     # Get the list of ID's
     wiki_ids = quotes_ID['qids']
 
+    # Return the result
     return wiki_ids
 
 
@@ -57,7 +59,7 @@ def concat_wiki_files():
 
     # Initialize the path
     path = 'data/wiki_speaker_attributes/'
-    path = os.path.join(os.getcwd, path)
+    path = os.path.join(os.getcwd(), path)
 
     # Get the dictionniary conatining all the adresses
     wiki_dict = get_dictionnary()['wiki speakers attributes']
@@ -65,12 +67,37 @@ def concat_wiki_files():
     # Loop over all the wiki files containing speaker attributes
     for key in wiki_dict:
         print(key)
+        
+        # Get the path of the current file
         current_path = os.path.join(path, key)
+
+        # If the file is not dowloaded in the directory, we download it.
         if not os.path.isfile(current_path):
             download(current_path, category)
+
+        # Append the list files containing all the previous files
         files.append(pd.read_parquet(current_path))
 
-
+    # Concatenating all the files in a single data frame
     df_wiki = pd.concat(files)
 
+    # Return the result
     return df_wiki
+
+
+# ----------------------------------------------------------------- #
+
+
+# The idea pf this function is to remov eall the duplicated line we 
+# could have in our dataframe.
+def remove_duplicates(df, column_name):
+
+    # Intializa ou cleaned dataframe
+    df_cleaned = df.copy()
+
+    # Apply a string filter and drop the duplicates
+    df_cleaned[column_name] = df_cleaned[column_name].apply(pandas_process).astype('|S')
+    df_cleaned = df_cleaned.drop_duplicates([column_name])
+
+    # Return the cleaned dataframe
+    return df_cleaned
