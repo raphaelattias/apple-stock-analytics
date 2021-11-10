@@ -46,6 +46,7 @@ Apple has been a market leader in the world of technology ever since the launch 
 `finance.py` : performing EDA of the Yahoo Finance dataset 
 #### Wikipedia
 `wikipedia.py` : pre-processing of the wikidata 
+
 `query_wikidata_dump.py` : recovering additional metadata about the speakers in the Quotebank dataset (identified with their QIDs)
 #### Jupyter Notebook
 `main.ipynb` : EDA and filtering of the datasets we use, subtasks analyses 
