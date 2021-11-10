@@ -26,10 +26,10 @@ def pandas_process(input):
 # the wiki data set. The idea is to have list of all the personb that
 # have spoken in Quotebank data set and keep only the wikipedia 
 # information we want. 
-def get_wiki_ids(quotes_ID):
+def get_wiki_ids(quotes):
 
     # Copy the data frame
-    # quotes_ID = quotes.copy()
+    quotes_ID = quotes.copy()
 
     # Apply the string filter and drop all the duplicates
     quotes_ID['qids'] = quotes_ID['qids'].apply(pandas_process).astype('|S')

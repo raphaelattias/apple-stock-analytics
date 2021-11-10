@@ -6,6 +6,7 @@
 *.pyc
 *.vscode
 __pycache__
+*.pkl
 
 # Ada Library Information
 *.ali

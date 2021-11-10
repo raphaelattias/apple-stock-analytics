@@ -62,7 +62,7 @@ def filter_quotes(path, keywords = {}, speakers = [""], chunksize = 1000, save =
     assert (keywords != {} and speakers !=  [""], "The keywords and speakers are empty lists, nothing to filter.")
 
     if save != None:
-        save_path = os.path.join("data/processed/", save+'.pkl')
+        save_path = os.path.join("data/processed_quotes/", save+'.pkl')
         if os.path.isfile(save_path):
             print(f"WARNING: the file {save_path} already exists and will be deleted at the end.")
     path = os.path.join(os.getcwd(),path)
@@ -111,7 +111,7 @@ def filter_quotes(path, keywords = {}, speakers = [""], chunksize = 1000, save =
     
     print(f"INFO: {len(df)} citations have been kept over ", total_nb, " total number of citations.")
 
-    return {"dataframe": df, "kept": len(df), "total": total_nb}
+    return {"dataframe": df, "total": total_nb}
 
 
 # ----------------------------------------------------------------- #
@@ -149,7 +149,7 @@ def load_quotes(year, category, limit = None, columns = None):
     elif category == 'unprocessed quotes':
         with bz2.open(path, "rt", encoding = "utf8") as bzinput:
             quotes = []
-            for i, line in enumerate(bzinput):
+            for i, line in tqdm(enumerate(bzinput)):
                 if limit != None and i == limit: break
 
                 quote = json.loads(line)
