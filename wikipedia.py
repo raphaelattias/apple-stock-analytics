@@ -5,8 +5,10 @@
 
 
 # Import all the libraries
+import os
 import pandas as pd
 import numpy as np
+from dataloader import *
 
 
 # ----------------------------------------------------------------- #
@@ -42,3 +44,33 @@ def get_wiki_ids(quotes):
 
 
 # ----------------------------------------------------------------- #
+
+# The idea of this function is to concatenate all the wiki files
+# for the speaker attributes in one big file. The goal is not to keep
+# a big file and keep surching for information inside, we will do a
+# filtering with all the qids of all the speakers we have.
+def concat_wiki_files():
+    
+    # Initialization of the files variable
+    files = []
+    category = 'wiki speakers attributes'
+
+    # Initialize the path
+    path = 'data/wiki_speaker_attributes/'
+    path = os.path.join(os.getcwd, path)
+
+    # Get the dictionniary conatining all the adresses
+    wiki_dict = get_dictionnary()['wiki speakers attributes']
+
+    # Loop over all the wiki files containing speaker attributes
+    for key in wiki_dict:
+        print(key)
+        current_path = os.path.join(path, key)
+        if not os.path.isfile(current_path):
+            download(current_path, category)
+        files.append(pd.read_parquet(current_path))
+
+
+    df_wiki = pd.concat(files)
+
+    return df_wiki
