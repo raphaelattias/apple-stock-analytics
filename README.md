@@ -40,13 +40,15 @@ Apple has been a market leader in the world of technology ever since the launch 
 *** 
 ### Code Architecture
 #### Quotebank 
-`dataloader.py` : loading and filtering the quotebank dataset according to our needs
-`quotebankexploration.py` : performing EDA of the quotebank dataset before and after filtering
+`dataloader.py` : loading and filtering the quotebank dataset according to our needs 
+`quotebankexploration.py` : performing EDA of the quotebank dataset before and after filtering 
 #### Yahoo Finance 
-`finance.py` : performing EDA of the Yahoo Finance dataset
+`finance.py` : performing EDA of the Yahoo Finance dataset 
 #### Wikipedia
 `wikipedia.py` : pre-processing of the wikidata
 `query_wikidata_dump.py` : recovering additional metadata about the speakers in the Quotebank dataset (identified with their QIDs)
+#### Jupyter Notebook
+`main.ipynb` : EDA and filtering of the datasets we use, subtasks analyses 
 
 
 
