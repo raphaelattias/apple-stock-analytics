@@ -34,9 +34,11 @@ def plot_pie_numquote(quote_df, year, head_ = 5):
 def plot_quotes_per_day(quote_df, year):
     quote_df.groupby("date")["quotation"].count().plot()
     plt.title('Numbers of quotes per day in %i' %year)
+    plt.ylabel("Number of quotes")
     plt.show()
 
 def plot_numOcc_per_day(quote_df, year):
     quote_df.groupby("date").sum().plot()
     plt.title('Numbers of occurrences of all the quotes per day in %i' %year)
+    plt.ylabel("Number of occurrences")
     plt.show()
