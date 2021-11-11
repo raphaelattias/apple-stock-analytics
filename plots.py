@@ -23,3 +23,23 @@ def bar_plots_quotes(frequency_all, frequency_apple, years):
     plt.legend()
 
     return 0
+
+def plot_pie_numquote(quote_df, year, head_ = 5):
+    ax = plt.subplots(figsize=(6, 3), subplot_kw=dict(aspect="equal"))
+    ax = quote_df.groupby("speaker")["quotation"].count().sort_values(ascending = False).drop(["none"]).head(head_).plot.pie()
+    ax.set(ylabel = None)
+    ax.set_title("Repartition of the number of quotes between the %i most commun speakers" %head_ + " for the year %i"  %year )
+    plt.show()
+
+
+def plot_quotes_per_day(quote_df, year):
+    quote_df.groupby("date")["quotation"].count().plot()
+    plt.title('Numbers of quotes per day in %i' %year)
+    plt.ylabel("Number of quotes")
+    plt.show()
+
+def plot_numOcc_per_day(quote_df, year):
+    quote_df.groupby("date").sum().plot()
+    plt.title('Numbers of occurrences of all the quotes per day in %i' %year)
+    plt.ylabel("Number of occurrences")
+    plt.show()
