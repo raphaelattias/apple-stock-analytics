@@ -6,9 +6,9 @@ Apple has been a market leader in the world of technology ever since the launch 
 
 ***
 ### Data sets used : 
-* `Quotebank DataSet` : To investigate the reciprocal relationships between the fluctuations of the Apple stock market and media coverage related to this company, we study mentions of Apple using time series analysis. The first step is to filter out any quotes that are not related to the company, the products or its direction board. The filtered dataset is then saved as a pickle file containing approximately 300.000 quotes out of the original 234 millions. From our observations, this new dataset has a minor number of outliers and provides a great preview of Apple mentions in the media. We will then analyse to what extent Apple is mentioned according to time in the media, who are the speakers talking about this company and the way they are talking about it. 
-* `Wikipedia API` : We use the Wikipedia API to recover informations about the speakers. We will classify them as having a significant influence or a low influence over potential customers based on the Wikipedia page view statistics per year. The idea is to get all the `Wiki qids` speakers that have have spoken in our filtered quotes data set. Then, with the Wikipedia API, we would get all the needed informations about the speakers.
-* `Yahoo Finance API` : Eventually, we use the Yahoo Finance API to recover informations about the stock markets. This API provides quick and easy access to finance metrics for any stock or index. Among the many financial metrics available we have decided to focus on the daily stock price and volume. The former will be an indicator of the long term health of the stock, and the latter of the daily volatility it may experience. In this milestone we will compare the Apple stock ($AAPL) to the S&P500 ($SPY) from 2008 until 2020, which is is a stock market index tracking the performance of 500 large companies listed on stock exchanges in the United States. We have chosen this equity index as it is one of the most tracked indices and generally an indicator of the overall health of the US stock market. 
+* `Quotebank DataSet` : To investigate the reciprocal relationships between the fluctuations of the Apple stock market and media coverage related to this company, we study mentions of Apple using time series analysis. We filter out any quotes that are not related to the company, the products or its direction board. The filtered dataset is then saved as a pickle file containing approximately 300.000 quotes out of the original 234 millions. This new dataset provides a great preview of Apple mentions in the media. We will then analyse to what extent Apple is mentioned according to time in the media, who are the speakers talking about this company and the way they are talking about it.
+* `Wikipedia API` : We use the Wikipedia API to recover informations about the speakers. We will classify them as having a significant influence or a low influence over potential customers based on the Wikipedia page view statistics per year. The idea is to get all the Wiki qids speakers that have have spoken in our filtered quotes dataset. Then, with the Wikipedia API, we would get all the needed informations about the speakers.
+* `Yahoo Finance API` : Eventually, we use the Yahoo Finance API to recover informations about the stock markets. This API provides quick and easy access to finance metrics for any stock or index. Among the many financial metrics available we decided to focus on the daily stock price and volume. The former will be an indicator of the long term health of the stock, and the latter of the daily volatility it may experience. In this milestone we compare the Apple stock ($AAPL) to the S&P500 ($SPY) from 2008 until 2020, which is is a stock market index tracking the performance of 500 large companies listed on stock exchanges in the US. We have chosen this equity index as it is one of the most tracked indices and generally an indicator of the overall health of the US stock market.
 
 ***
 ### Methods : 
@@ -18,7 +18,7 @@ Apple has been a market leader in the world of technology ever since the launch 
 
 ***
 ### Proposed timeline : 
-**Week 8 :** *(12/11 : Milestone P2 due)*
+**Week 8 :** *(12/11 : P2 due)*
 
 **Week 9 :** Begin subtasks 1 and 2 (What is the role of the media coverage in explaining stock market fluctuations ? Who are the individuals who have influence over potential customers, and do these influencers have an impact on the Apple company image and eventually, on the stock market ?)
 
@@ -28,7 +28,7 @@ Apple has been a market leader in the world of technology ever since the launch 
 
 **Week 12 :** Create a website with interactive graphs for our data story. Write the README. 
 
-**Week 13 :** Finalize the website, the notebook, the code architecture and the README. *(17/12 : Milestone P3 due)*
+**Week 13 :** Finalize the website, the notebook, the code architecture and the README. *(17/12 : P3 due)*
 
 ***
 ### Organization within the team : 
