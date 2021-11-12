@@ -6,6 +6,7 @@ import matplotlib
 import numpy as np
 import warnings
 warnings.simplefilter(action='ignore')
+alpha_ = 0.7
 
 def stock(stock_name, year = 2020, fig = "price_volume"):
   assert fig in ["price_volume", "daily_diff", "volume"]
@@ -33,7 +34,7 @@ def stock(stock_name, year = 2020, fig = "price_volume"):
   elif fig == "daily_diff":
     stock['Daily Diff']=(stock['Close']-stock['Open'])*100/stock['Open']
     fig, ax3 = plt.subplots(figsize=(12,6))
-    stock['Daily Diff'].plot.hist(bins=30, ax=ax3)
+    stock['Daily Diff'].plot.hist(bins=30, ax=ax3, alpha = alpha_)
     plt.axvline(stock['Daily Diff'].mean(), color = "r")
     plt.title(f"Histogram of the daily difference between opening and closing price for the ${stock_name} stock in {year}.")
     plt.xlabel("Percentage difference between the closing and opening price")
@@ -41,7 +42,7 @@ def stock(stock_name, year = 2020, fig = "price_volume"):
 
   elif fig == "volume":
     fig, ax4 = plt.subplots(figsize=(12,6))
-    stock['Volume'].plot.hist(bins=30, ax=ax4)
+    stock['Volume'].plot.hist(bins=30, ax=ax4, alpha = alpha_)
     plt.axvline(stock['Volume'].mean(), color = "r")
     plt.title(f"Histogram of the daily volume for the ${stock_name} stock in {year}.")
     plt.xlabel("Daily volume of exchange")
