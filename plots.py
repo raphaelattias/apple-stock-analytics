@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from wordcloud import WordCloud, STOPWORDS
 
 alpha_ = 0.7
 figsize = [10.0, 6.0]
@@ -64,3 +65,42 @@ def plot_numOcc_per_day(quote_df, year):
     plt.rcParams['figure.dpi'] = DPI
 
     plt.show()
+
+    
+def plot_wordcloud(text): 
+    """
+    Plot a Word Cloud for representing text data in which the size of each word indicates its frequency or importance.
+
+    Inputs:
+        * text (pd.Series): text dataset used for generating the word cloud 
+    """
+    comment_words = ''
+    stopwords = set(STOPWORDS)
+
+    # iterate through text
+    for val in text:
+
+        # typecaste each val to string
+        val = str(val)
+
+        # split the value
+        tokens = val.split()
+
+        # Converts each token into lowercase
+        for i in range(len(tokens)):
+            tokens[i] = tokens[i].lower()
+
+        comment_words += " ".join(tokens)+" "
+
+    wordcloud = WordCloud(width = 800, height = 800,
+                    background_color ='white',
+                    stopwords = stopwords,
+                    min_font_size = 10).generate(comment_words)
+
+    # plot the WordCloud image                      
+    plt.figure(figsize = (8, 8), facecolor = None)
+    plt.imshow(wordcloud)
+    plt.axis("off")
+    plt.tight_layout(pad = 0)
+
+    plt.show()    
