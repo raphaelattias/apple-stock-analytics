@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import matplotlib
 import seaborn as sns
+import math
 
 import plotly.graph_objects as go
 import plotly.io as pio
@@ -32,34 +33,33 @@ def task1():
   stock.reset_index(inplace=True)
 
   quotes = pd.concat([load_quotes(i, 'processed quotes') for i in range(year_start,year_end+1)])
-
+  quotes.rename({'quotation': 'Quotation'}, axis = 1, inplace=True)
   q1 = 0.98
   q2 = 0.98
 
 
-  stock['Normalized'] = stock['Open']*stock['Volume']
-  stock['Volatile'] = stock.apply(lambda x: x['Normalized'] > np.quantile(stock[stock.Date.dt.year == x.Date.year]['Normalized'], q = q1), axis=1)
-
+  stock['Liquidity'] = stock['Open']*stock['Volume']
+  stock['Volatility'] = stock.apply(lambda x: x['Liquidity'] > np.quantile(stock[stock.Date.dt.year == x.Date.year]['Liquidity'], q = q1), axis=1)
+  stock['Volatility'] = stock.Volatility.apply(lambda x : "Volatile" if x else "Regular")
 
 
   ######
 
 
-  weekly = pd.DataFrame(stock.resample('W', on='Date')['Normalized'].sum())
+  weekly = pd.DataFrame(stock.resample('W', on='Date')['Liquidity'].sum())
   weekly['Volume'] = stock.resample('W', on='Date')['Volume'].sum()
   weekly.index.rename('Date')
   weekly.reset_index(inplace=True)
-  weekly['Volatile'] = weekly.apply(lambda x: x['Normalized'] > np.quantile(weekly[weekly.Date.dt.year == x.Date.year]['Normalized'], q = q1), axis=1)
+  weekly['Volatility'] = weekly.apply(lambda x: x['Liquidity'] > np.quantile(weekly[weekly.Date.dt.year == x.Date.year]['Liquidity'], q = q1), axis=1)
 
   pio.renderers.default = "notebook_connected"
-  fig = px.bar(stock, x='Date', y='Normalized', color='Volatile', title=f"Liquidity traded for the ${stock_name} stock between {year_start} and {year_end}")
+  fig = px.bar(stock, x='Date', y='Liquidity', color='Volatility', title=f"Liquidity traded for the ${stock_name} stock between {year_start} and {year_end}")
   fig.update_xaxes(
       rangeslider_visible=True,
       rangeselector=dict(
           buttons=list([
               dict(count=1, label="1m", step="month", stepmode="backward"),
               dict(count=6, label="6m", step="month", stepmode="backward"),
-              dict(count=1, label="YTD", step="year", stepmode="todate"),
               dict(count=1, label="1y", step="year", stepmode="backward"),
               dict(step="all")
           ])
@@ -78,14 +78,13 @@ def task1():
 
  
   pio.renderers.default = "notebook_connected"
-  fig = px.bar(stock, x='Date', y='Open', color='Volatile', title=f"Daily Stock Price for the ${stock_name} stock between {year_start} and {year_end}")
+  fig = px.bar(stock, x='Date', y='Open', color='Volatility', title=f"Daily Stock Price for the ${stock_name} stock between {year_start} and {year_end}")
   fig.update_xaxes(
       rangeslider_visible=True,
       rangeselector=dict(
           buttons=list([
               dict(count=1, label="1m", step="month", stepmode="backward"),
               dict(count=6, label="6m", step="month", stepmode="backward"),
-              dict(count=1, label="YTD", step="year", stepmode="todate"),
               dict(count=1, label="1y", step="year", stepmode="backward"),
               dict(step="all")
           ])
@@ -104,23 +103,25 @@ def task1():
   ######
 
 
-  daily_quotes = pd.DataFrame(quotes.groupby(quotes.date.dt.date).quotation.count())
+  daily_quotes = pd.DataFrame(quotes.groupby(quotes.date.dt.date).Quotation.count())
   daily_quotes.index.rename('Date')
   daily_quotes.reset_index(inplace=True)
-  daily_quotes['date']= pd.to_datetime(daily_quotes['date'], errors='coerce')
-  daily_quotes['HighCount'] = daily_quotes.apply(lambda x: x['quotation'] > np.quantile(daily_quotes[daily_quotes.date.dt.year == x.date.year]['quotation'], q = q1), axis=1)
-  #daily_quotes['HighCount'] = daily_quotes['quotation'] > np.quantile(daily_quotes['quotation'], q = q2)
+  daily_quotes.rename({'date': 'Date'}, axis=1, inplace=True)
+  daily_quotes['Date']= pd.to_datetime(daily_quotes['Date'], errors='coerce')
+  daily_quotes['Yearly Percentile'] = daily_quotes.apply(lambda x: x['Quotation'] > np.quantile(daily_quotes[daily_quotes.Date.dt.year == x.Date.year]['Quotation'], q = q2), axis=1)
+  daily_quotes['Yearly Percentile'] = daily_quotes['Yearly Percentile'].apply(lambda x : f"Top {(100-q2*100)/100}%" if x else f"Lower {q2}%")
+  
+  #daily_quotes['High Count'] = daily_quotes['Quotation'] > np.quantile(daily_quotes['Quotation'], q = q2)
 
 
   pio.renderers.default = "notebook_connected"
-  fig = px.bar(daily_quotes, x='date', y='quotation', color='HighCount', title=f"Daily Number of quotes related to Apple between {year_start} and {year_end}")
+  fig = px.bar(daily_quotes, x='Date', y='Quotation', color='Yearly Percentile', title=f"Daily Number of quotes related to Apple between {year_start} and {year_end}")
   fig.update_xaxes(
       rangeslider_visible=True,
       rangeselector=dict(
           buttons=list([
               dict(count=1, label="1m", step="month", stepmode="backward"),
               dict(count=6, label="6m", step="month", stepmode="backward"),
-              dict(count=1, label="YTD", step="year", stepmode="todate"),
               dict(count=1, label="1y", step="year", stepmode="backward"),
               dict(step="all")
           ])
@@ -137,8 +138,8 @@ def task1():
   # ax1 = sns.set_style(style="white", rc=None )
   # fig, ax1 = plt.subplots(figsize=(12,6))
   # daily_quotes.date = pd.to_datetime(daily_quotes.date, format='%Y-%m-%d')
-  # sns.barplot(x= daily_quotes['date'], y= daily_quotes['quotation'], ax = ax1, color='green')
-  # sns.barplot(x= daily_quotes['date'], y= daily_quotes[daily_quotes.HighCount]['quotation'], ax = ax1, color='red')
+  # sns.barplot(x= daily_quotes['date'], y= daily_quotes['Quotation'], ax = ax1, color='green')
+  # sns.barplot(x= daily_quotes['date'], y= daily_quotes[daily_quotes.High Count]['Quotation'], ax = ax1, color='red')
   # ax1.xaxis.set_major_locator(matplotlib.dates.AutoDateLocator())
   # x_dates = daily_quotes['date'].dt.strftime('%Y-%m').sort_values().unique()
   # ax1.set_xticklabels(labels = x_dates, rotation=45, ha='right')
