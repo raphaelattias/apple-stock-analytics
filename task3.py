@@ -3,6 +3,8 @@ import pandas as pd
 import seaborn as sns
 import matplotlib
 import numpy as np
+import yfinance as yf
+from dataloader import *
 import plotly.express as px
 import plotly.graph_objects as go
 import plotly.offline as py
@@ -14,8 +16,19 @@ from ipywidgets import interactive, HBox, VBox, Checkbox
 import vaderSentiment
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
-def task3(quotes):
+def task3():
 
+    stock_name = "AAPL"
+    year = 2019
+    year_start = 2015
+    year_end = 2019
+    # Find the days of high volatility 
+    stock = yf.download(stock_name, start=f'{year_start}-01-01', end=f'{year_end}-12-31', progress = False)
+    stock.reset_index(inplace=True)
+
+    quotes = pd.concat([load_quotes(i, 'processed quotes') for i in range(year_start,year_end+1)])
+    quotes.rename({'quotation': 'Quotation'}, axis = 1, inplace=True)
+    
     analyzer = SentimentIntensityAnalyzer()
     # determine the sentiment of a quote in a corpus (positive, negative or neutral)
     def sentiment(quote) : 
@@ -26,7 +39,7 @@ def task3(quotes):
             return('negative') 
         else : return('neutral')  
 
-    quotes['sentiment'] = quotes['quotation'].apply(sentiment) 
+    quotes['sentiment'] = quotes['Quotation'].apply(sentiment) 
 
     # plot the distribution of the sentiments in the corpus 
     df_sent = quotes.groupby(['sentiment']).sum().reset_index()
@@ -36,7 +49,7 @@ def task3(quotes):
     neg_quotes = quotes[quotes['sentiment'] == 'negative']
     neut_quotes = quotes[quotes['sentiment'] == 'neutral']
 
-    # plot the distribution of the positive quotes according to time
+    # plot the distribution of the neutral quotes according to time
     neut_per_day = pd.DataFrame(neut_quotes.groupby(neut_quotes.date.dt.date).count()['sentiment'])
     neut_per_day.index.rename('Date')
     neut_per_day.reset_index(inplace=True)
@@ -91,6 +104,7 @@ def task3(quotes):
                     bargroupgap = 0,
                     )
     fig.show()
+    fig.write_html("figures/pos_neg_neutral.html")
 
     ##########
 
@@ -179,6 +193,7 @@ def task3(quotes):
     fig.update_traces(marker_line_width = 0,
                     selector=dict(type="bar"))
     fig.show()
+    fig.write_html("figures/all_quotes_sentiment.html")
 
     
     return None
