@@ -5,6 +5,7 @@ import os
 from tqdm.notebook import tqdm
 from tqdm import trange
 import gdown
+from quotebankexploration import *
 
 # conda install -c conda-forge ipywidgets
 # conda install tqdm
@@ -200,6 +201,11 @@ def get_filtered_quotes():
 
     # Concatenation
     filtered_quotes = pd.concat(filtered_quotes)
+
+    # Refilter
+    filtered_quotes = refilter(filtered_quotes)
+
+    filtered_quotes = filtered_quotes.reset_index(drop = True)
 
     # Return the results
     return filtered_quotes
