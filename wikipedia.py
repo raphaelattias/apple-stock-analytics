@@ -8,6 +8,8 @@
 import os
 import pandas as pd
 import numpy as np
+import pageviewapi 
+
 from dataloader import *
 
 
@@ -26,23 +28,31 @@ def pandas_process(input):
 ''' !!! TO SUPRESS !!! '''
 
 # This function is here to get all the ID of the different speakers in 
-# the wiki data set. The idea is to have list of all the personb that
-# have spoken in Quotebank data set and keep only the wikipedia 
+# the wiki data set. The idea is to have list of all the person that
+# have spoken in Quotebank da  ta set and keep only the wikipedia 
 # information we want. 
-def get_wiki_ids(quotes):
+def get_speakers_ids(quotes):
 
     # Copy the data frame
-    quotes_ID = quotes.copy()
+    wiki_quotes = quotes.copy()
+    all_indices = wiki_quotes.index
 
     # Apply the string filter and drop all the duplicates
-    quotes_ID['qids'] = quotes_ID['qids'].apply(pandas_process).astype('|S')
-    quotes_ID = quotes_ID.drop_duplicates(['qids'])
+    wiki_quotes['qids'] = wiki_quotes['qids'].apply(pandas_process).astype('|S')
+    wiki_quotes = wiki_quotes.drop_duplicates(['qids'])
+
+    # Get the indices to drop
+    indices_to_keep = np.array(wiki_quotes.index)
+    # indices_to_drop = set(all_indices) - set(indices_to_keep)
+    wiki_quotes = quotes.iloc[indices_to_keep]
 
     # Get the list of ID's
-    quotes_ID = quotes_ID['qids']
+    wiki_quotes = wiki_quotes[['speaker', 'qids']]
+    wiki_quotes = wiki_quotes.dropna()
+    wiki_quotes = wiki_quotes.drop(wiki_quotes[wiki_quotes.speaker == 'None'].index).reset_index(drop = True)
 
     # Return the result
-    return quotes_ID
+    return wiki_quotes
 
 
 # ----------------------------------------------------------------- #
@@ -102,3 +112,130 @@ def remove_duplicates(df, column_name):
 
     # Return the cleaned dataframe
     return df_cleaned
+
+
+
+# ----------------------------------------------------------------- #
+
+
+
+def get_page_views_per_year(page, year):
+
+    # Time line
+    begin = str(year) + '0101'
+    end = str(year) + '1231'
+
+    # Get the data frame from wikipedia API
+    df_wiki_api = pd.DataFrame(pageviewapi.per_article('en.wikipedia', page, begin, end,
+                        access='all-access', agent='all-agents', granularity='monthly')['items'])
+    
+    # Get the number of page views
+    nb_pages_views = df_wiki_api.views.sum()
+
+    # Return the results
+    return nb_pages_views
+
+
+
+
+
+
+# ----------------------------------------------------------------- #
+
+
+def get_total_page_views(page):
+    page_views = np.array([get_page_views_per_year(page, year) for year in range(wiki_page_year(page), 2021)])
+    total_nb = np.sum(page_views)
+    return total_nb
+
+
+
+# ----------------------------------------------------------------- #
+
+
+def exist_wiki_page_for_year(speaker, year):
+
+    try :
+        get_page_views_per_year(speaker, year)
+        return True
+
+    except:
+        return False
+
+
+# ----------------------------------------------------------------- #
+
+
+
+def wiki_page_year(speaker):
+
+    # Check wether this speaker has a wiki page
+    for year in range(2015, 2021):
+        if exist_wiki_page_for_year(speaker, year):
+            return year
+
+    # Return flase if it has not one
+    return 2021
+
+        
+
+# ----------------------------------------------------------------- #
+
+
+
+def exist_wiki_page(speaker):
+
+    # Check wether this speaker has a wiki page
+    for year in range(2015, 2021):
+        if exist_wiki_page_for_year(speaker, year):
+            return True
+
+    # Return flase if it has not one
+    return False
+
+
+# ----------------------------------------------------------------- #
+
+
+def wiki_label_speaker(ids, wiki_data):
+
+    # Initialization
+    label = None
+    prev_nb_views = 0
+
+    # Go through all the qids for a specific speaker
+    for id in ids:
+        try:
+            speaker = wiki_data.label[wiki_data.id == id].reset_index(drop = True).values[0]
+            total_page_views = get_total_page_views(speaker)
+
+            if exist_wiki_page(speaker) and total_page_views > prev_nb_views:
+                label = speaker
+                prev_nb_views = total_page_views
+        except:
+            pass
+        
+    return label
+
+# ----------------------------------------------------------------- #
+
+
+
+def add_labels(speakers_id, wiki_data, save = False):
+
+    speakers_id_new_df = speakers_id.copy()
+    speakers_label = speakers_id.qids.apply(lambda ids: wiki_label_speaker(ids, wiki_data))
+    speakers_id_new_df['label'] = speakers_label
+
+    # Save the dataframe in a pkl file, such that we do not have to run again this function
+    if save:
+        save_path = os.path.abspath('data/wiki_speaker_attributes/speaker_labels.pkl')
+        if os.path.isfile(save_path):
+            print(f"WARNING: the file {save_path} already exists and will be deleted at the end.")
+        speakers_id_new_df.to_pickle(save_path)
+
+    return speakers_id_new_df
+
+
+
+# ----------------------------------------------------------------- #
