@@ -73,6 +73,7 @@ def task1():
                     bargroupgap = 0,
                   )
   fig.show()
+  fig.write_html("figures/liquidity.html")
 
   ######
 
@@ -98,7 +99,7 @@ def task1():
                     bargroupgap = 0,
                   )
   fig.show()
-
+  fig.write_html("figures/stock_price.html")
 
 
   ######
@@ -135,6 +136,7 @@ def task1():
                     bargroupgap = 0,
                   )
   fig.show()
+  fig.write_html("figures/daily_quotes.html")
 
   # ax1 = sns.set_style(style="white", rc=None )
   # fig, ax1 = plt.subplots(figsize=(12,6))
