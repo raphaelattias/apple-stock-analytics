@@ -15,13 +15,14 @@ import math
 import plotly.graph_objects as go
 import plotly.io as pio
 import plotly.express as px
+from plotly.subplots import make_subplots
+from scipy.stats import pearsonr
 import numpy as np
 
 pio.renderers.default = "notebook_connected"
 
 from statsmodels.tsa.seasonal import seasonal_decompose
 from statsmodels.tsa.stattools import adfuller
-
 def task1():
 
   stock_name = "AAPL"
@@ -29,7 +30,7 @@ def task1():
   year_start = 2015
   year_end = 2019
   # Find the days of high volatility 
-  stock = yf.download(stock_name, start=f'{year_start}-01-01', end=f'{year_end}-08-31', progress = False)
+  stock = yf.download(stock_name, start=f'{year_start}-01-01', end=f'{year_end}-12-31', progress = False)
   stock.reset_index(inplace=True)
 
   quotes = pd.concat([load_quotes(i, 'processed quotes') for i in range(year_start,year_end+1)])
@@ -109,7 +110,7 @@ def task1():
   daily_quotes.rename({'date': 'Date'}, axis=1, inplace=True)
   daily_quotes['Date']= pd.to_datetime(daily_quotes['Date'], errors='coerce')
   daily_quotes['Yearly Percentile'] = daily_quotes.apply(lambda x: x['Quotation'] > np.quantile(daily_quotes[daily_quotes.Date.dt.year == x.Date.year]['Quotation'], q = q2), axis=1)
-  daily_quotes['Yearly Percentile'] = daily_quotes['Yearly Percentile'].apply(lambda x : f"Top {(100-q2*100)/100}%" if x else f"Lower {q2}%")
+  daily_quotes['Yearly Percentile'] = daily_quotes['Yearly Percentile'].apply(lambda x : f"Top {int(100-q2*100)}%" if x else f"Lower {int(q2*100)}%")
   
   #daily_quotes['High Count'] = daily_quotes['Quotation'] > np.quantile(daily_quotes['Quotation'], q = q2)
 
@@ -145,6 +146,9 @@ def task1():
   # ax1.set_xticklabels(labels = x_dates, rotation=45, ha='right')
 
   #######
+
+  ######
+
   from statsmodels.tsa.seasonal import seasonal_decompose
   from statsmodels.tsa.stattools import adfuller
 
@@ -180,5 +184,68 @@ def task1():
       best_value = p_value
 
   print(best_period,best_value)
+
+
+######
+  best_value = 1
+  for period in range(1,125):
+    analysis = stock.copy()
+    analysis.set_index('Date',inplace=True)
+    analysis = analysis['Volume']
+    decompose_result_mult = seasonal_decompose(analysis, model="additive",period=period)
+
+    trend = decompose_result_mult.trend
+    seasonal = decompose_result_mult.seasonal
+    residual = decompose_result_mult.resid
+
+    p_value = adfuller(residual.dropna())[1]
+
+    if p_value < best_value:
+      best_period = period
+      best_value = p_value
+
+  print(best_period,best_value)
+
+  ####
+  # layout = go.Layout(
+  #     barmode='stack',
+  #     title='Stacked Bar with Pandas'
+  # )
+
+
+  fig = make_subplots(specs=[[{"secondary_y": True}]])
+  fig.add_trace(go.Bar(x=daily_quotes['Date'], y=daily_quotes['Quotation'], name = "Number of quotations" ))
+  fig.add_trace(go.Scatter(x=stock['Date'], y=stock['Open'], name = f"{stock_name} stock price"),secondary_y=True)
+  fig.update_traces(marker_line_width = 0,
+                  selector=dict(type="bar"))
+  fig.update_xaxes(title_text="Date")
+  fig.update_yaxes(title_text="Quotations", secondary_y=False)
+  fig.update_yaxes(title_text="Price in USD$", secondary_y=True)
+  fig.update_layout(bargap=0.1,
+                  bargroupgap = 0,
+                  title=f"Stock price of ${stock_name} compared to the number of quotations related to Apple from {year_start} to {year_end}."
+                  )
+  #fig = go.Figure(data=data, layout=layout)
+  fig.update_xaxes(
+      rangeslider_visible=True,
+      rangeselector=dict(
+          buttons=list([
+              dict(count=1, label="1m", step="month", stepmode="backward"),
+              dict(count=6, label="6m", step="month", stepmode="backward"),
+              dict(count=1, label="1y", step="year", stepmode="backward"),
+              dict(step="all")
+          ])
+      )
+  )
+  # IPython notebook
+  fig.show()
+
+  ####
+
+  stock_to_keep = stock[stock.Date.isin(set(stock.Date).intersection(set(daily_quotes.Date)))]
+  daily_quotes_to_keep = daily_quotes[daily_quotes.Date.isin(set(stock.Date).intersection(set(daily_quotes.Date)))]
+
+  pearsonr(stock_to_keep.Liquidity,daily_quotes_to_keep.Quotation)
+
 
   return None
