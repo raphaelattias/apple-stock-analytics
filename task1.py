@@ -241,6 +241,7 @@ def task1():
   )
   # IPython notebook
   fig.show()
+  fig.write_html("figures/daily_quotes_related_Apple_stock.html")
 
   ####
 

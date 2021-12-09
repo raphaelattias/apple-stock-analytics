@@ -168,7 +168,7 @@ def task3():
                         method="update",
                         args=[{"visible": [False, True, False, False]},
                             {"title": "Negative quotes"}]),
-                    dict(label="Positie",
+                    dict(label="Positive",
                         method="update",
                         args=[{"visible": [False, False, True, False]},
                             {"title": "Positive quotes"}]),
