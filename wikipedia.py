@@ -220,19 +220,98 @@ def wiki_label_speaker(ids, wiki_data):
 # ----------------------------------------------------------------- #
 
 
-
-def add_labels(speakers_id, wiki_data, save = False):
-
-    speakers_id_new_df = speakers_id.copy()
-    speakers_label = speakers_id.qids.apply(lambda ids: wiki_label_speaker(ids, wiki_data))
-    speakers_id_new_df['label'] = speakers_label
-
-    # Save the dataframe in a pkl file, such that we do not have to run again this function
+def save_speakers_id(speakers_id, save, id_nb):
     if save:
-        save_path = os.path.abspath('data/wiki_speaker_attributes/speaker_labels.pkl')
+        name = 'speakers_labels_' + str(id_nb)
+        save_path = os.path.join('data/wiki_speaker_attributes', name+ '.pkl')
         if os.path.isfile(save_path):
             print(f"WARNING: the file {save_path} already exists and will be deleted at the end.")
-        speakers_id_new_df.to_pickle(save_path)
+        speakers_id.to_pickle(save_path)
+
+    return None
+
+
+
+
+# ----------------------------------------------------------------- #
+
+
+def get_speakers_labels():
+    folder_path = 'data/wiki_speaker_attributes/'
+    file_name = 'speakers_labels_'
+    speakers_labels = pd.read_pickle(os.path.join(folder_path + file_name + '1.pkl'))
+
+    for idx_file in range(1, 21):
+        path = os.path.join(folder_path + file_name + str(idx_file) + '.pkl')
+        current_speakers_labels = pd.read_pickle(path)
+        speakers_labels = pd.concat([speakers_labels, current_speakers_labels])
+    
+    speakers_labels = speakers_labels.drop_duplicates(subset=['speaker']).reset_index(drop = True)
+
+    return speakers_labels
+
+
+# ----------------------------------------------------------------- #
+
+
+
+
+
+def add_labels(speakers_id, wiki_data, save = False, cluster = None):
+
+    if cluster == None:
+        speakers_id_new_df = speakers_id.copy()
+        nb_elem = speakers_id_new_df.shape[0]
+        batch_size = nb_elem / 20
+
+        speakers_id_batch = speakers_id.copy().iloc[np.arange(0, batch_size).astype(int)]
+
+        speakers_label_batch = speakers_id_batch.qids.apply(lambda ids: wiki_label_speaker(ids, wiki_data))
+        speakers_id_batch['label'] = speakers_label_batch
+
+        save_speakers_id(speakers_id_batch, save, 1)
+
+        for batch in range(1, 20):
+            batch_begin = (batch * batch_size) + 1
+            batch_end = min(nb_elem, batch_begin + batch_size)
+
+            speakers_id_batch = speakers_id.copy().iloc[np.arange(batch_begin, batch_end).astype(int)]
+
+            speakers_label_batch = speakers_id_batch.qids.apply(lambda ids: wiki_label_speaker(ids, wiki_data))
+            speakers_id_batch['label'] = speakers_label_batch
+
+            save_speakers_id(speakers_id_batch, save, batch + 1)
+
+    else:
+        speakers_id_new_df = speakers_id.copy()
+        nb_elem = speakers_id_new_df.shape[0]
+        sub_set_size = nb_elem / 4
+
+        begin = (cluster - 1) * sub_set_size
+        if cluster == 4:
+            end = nb_elem
+        else:
+            end = (cluster * sub_set_size) - 1
+
+        sub_set_nb_elem = end - begin + 1
+
+        batch_size = sub_set_nb_elem / 5
+
+        for batch in range(0, 5):
+
+            batch_begin = begin + (batch_size * batch)
+            batch_end = min(end, batch_begin + batch_size - 1)
+
+            speakers_id_batch = speakers_id.copy().iloc[np.arange(batch_begin, min(end, batch_end + 1)).astype(int)]
+
+            speakers_label_batch = speakers_id_batch.qids.apply(lambda ids: wiki_label_speaker(ids, wiki_data))
+            speakers_id_batch['label'] = speakers_label_batch
+
+            id_nb = ((cluster - 1) * 5) + 1 + batch
+
+            save_speakers_id(speakers_id_batch, save, id_nb)
+    
+    speakers_id_new_df = get_speakers_labels()
 
     return speakers_id_new_df
 
