@@ -121,19 +121,22 @@ def remove_duplicates(df, column_name):
 
 def get_page_views_per_year(page, year):
 
-    # Time line
-    begin = str(year) + '0101'
-    end = str(year) + '1231'
+    nb_page_views = None
 
-    # Get the data frame from wikipedia API
-    df_wiki_api = pd.DataFrame(pageviewapi.per_article('en.wikipedia', page, begin, end,
-                        access='all-access', agent='all-agents', granularity='monthly')['items'])
-    
-    # Get the number of page views
-    nb_pages_views = df_wiki_api.views.sum()
+    if str(page) != 'None':
+        # Time line
+        begin = str(year) + '0101'
+        end = str(year) + '1231'
+
+        # Get the data frame from wikipedia API
+        df_wiki_api = pd.DataFrame(pageviewapi.per_article('en.wikipedia', page, begin, end,
+                            access='all-access', agent='all-agents', granularity='monthly')['items'])
+        
+        # Get the number of page views
+        nb_page_views = df_wiki_api.views.sum()
 
     # Return the results
-    return nb_pages_views
+    return nb_page_views
 
 
 
@@ -253,8 +256,16 @@ def get_speakers_labels():
 
 # ----------------------------------------------------------------- #
 
+def find_labels(speakers_id, wiki_data):
+
+    speakers_id_new = speakers_id.copy()
+    speakers_label = speakers_id.qids.apply(lambda ids: wiki_label_speaker(ids, wiki_data))
+    speakers_id_new['label'] = speakers_label
+
+    return speakers_id_new
 
 
+# ----------------------------------------------------------------- #
 
 
 def add_labels(speakers_id, wiki_data, save = False, cluster = None):
@@ -266,8 +277,7 @@ def add_labels(speakers_id, wiki_data, save = False, cluster = None):
 
         speakers_id_batch = speakers_id.copy().iloc[np.arange(0, batch_size).astype(int)]
 
-        speakers_label_batch = speakers_id_batch.qids.apply(lambda ids: wiki_label_speaker(ids, wiki_data))
-        speakers_id_batch['label'] = speakers_label_batch
+        speakers_id_batch = find_labels(speakers_id, wiki_data)
 
         save_speakers_id(speakers_id_batch, save, 1)
 
@@ -277,8 +287,7 @@ def add_labels(speakers_id, wiki_data, save = False, cluster = None):
 
             speakers_id_batch = speakers_id.copy().iloc[np.arange(batch_begin, batch_end).astype(int)]
 
-            speakers_label_batch = speakers_id_batch.qids.apply(lambda ids: wiki_label_speaker(ids, wiki_data))
-            speakers_id_batch['label'] = speakers_label_batch
+            speakers_id_batch = find_labels(speakers_id_batch, wiki_data)
 
             save_speakers_id(speakers_id_batch, save, batch + 1)
 
@@ -304,8 +313,7 @@ def add_labels(speakers_id, wiki_data, save = False, cluster = None):
 
             speakers_id_batch = speakers_id.copy().iloc[np.arange(batch_begin, min(end, batch_end + 1)).astype(int)]
 
-            speakers_label_batch = speakers_id_batch.qids.apply(lambda ids: wiki_label_speaker(ids, wiki_data))
-            speakers_id_batch['label'] = speakers_label_batch
+            speakers_id_batch = find_labels(speakers_id_batch, wiki_data)
 
             id_nb = ((cluster - 1) * 5) + 1 + batch
 
