@@ -9,7 +9,7 @@ import os
 from quotebankexploration import *
 from wikipedia import *
 
-if _name_ == "_main_":
+if __name__ == "__main__":
     # Get some data frames
     wiki_data = concat_wiki_files()
     filtered_quotes = get_filtered_quotes()
