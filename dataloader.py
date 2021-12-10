@@ -60,7 +60,7 @@ def filter_quotes(path, keywords = {}, speakers = [""], chunksize = 1000, save =
         pd.dataframe: Filtered panda dataframe
     """
     
-    assert (keywords != {} and speakers !=  [""], "The keywords and speakers are empty lists, nothing to filter.")
+    assert keywords != {} and speakers !=  [""], "The keywords and speakers are empty lists, nothing to filter."
 
     if save != None:
         save_path = os.path.join("data/processed_quotes/", save+'.pkl')
