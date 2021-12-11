@@ -99,6 +99,7 @@ def concat_wiki_files():
 # ----------------------------------------------------------------- #
 
 
+
 # The idea pf this function is to remov eall the duplicated line we 
 # could have in our dataframe.
 def remove_duplicates(df, column_name):
@@ -129,11 +130,14 @@ def get_page_views_per_year(page, year):
         end = str(year) + '1231'
 
         # Get the data frame from wikipedia API
-        df_wiki_api = pd.DataFrame(pageviewapi.per_article('en.wikipedia', page, begin, end,
+        try:
+            df_wiki_api = pd.DataFrame(pageviewapi.per_article('en.wikipedia', page, begin, end,
                             access='all-access', agent='all-agents', granularity='monthly')['items'])
         
-        # Get the number of page views
-        nb_page_views = df_wiki_api.views.sum()
+            # Get the number of page views
+            nb_page_views = df_wiki_api.views.sum()
+        except:
+             pass
 
     # Return the results
     return nb_page_views
@@ -248,6 +252,19 @@ def get_speakers_labels():
         path = os.path.join(folder_path + file_name + str(idx_file) + '.pkl')
         current_speakers_labels = pd.read_pickle(path)
         speakers_labels = pd.concat([speakers_labels, current_speakers_labels])
+    
+    speakers_labels = speakers_labels.drop_duplicates(subset=['speaker']).reset_index(drop = True)
+
+    return speakers_labels
+
+
+# ----------------------------------------------------------------- #
+
+
+def get_speakers_labels_one_file():
+    folder_path = 'data/wiki_speaker_attributes/'
+    file_name = 'speakers_labels.pkl'
+    speakers_labels = pd.read_pickle(os.path.join(folder_path + file_name))
     
     speakers_labels = speakers_labels.drop_duplicates(subset=['speaker']).reset_index(drop = True)
 

@@ -18,16 +18,11 @@ if __name__ == "__main__":
     speakers_labels = get_speakers_labels()
 
     '''
-    REMARK: Tu marques une annee pour chaque cluster
+    REMARK: Année de 2017 à 2020 => 2015 et 2016 déjà fait
     '''
     year = 2015
 
-    test = speakers_labels.head(10)
-
     # DO NOT TOUCH
-    path = os.path.join('data/wiki_speaker_attributes/pageviews_'+str(year))
-    test[str(year)] = test.label.apply(lambda label: get_page_views_per_year(label, year))
-    test.to_pickle(path)
-    
-    # speakers_labels[str(year)] = speakers_labels.label.apply(lambda label: get_page_views_per_year(label, year))
-    # speakers_labels.to_pickle(path)
+    path = os.path.join('data/wiki_speaker_attributes/speakers_pageviews_'+str(year))
+    speakers_labels[str(year)] = speakers_labels.label.progress_apply(lambda label: get_page_views_per_year(label, year))
+    speakers_labels.to_pickle(path)
