@@ -9,6 +9,7 @@ import os
 import pandas as pd
 import numpy as np
 import pageviewapi 
+from tqdm import tqdm
 
 from dataloader import *
 

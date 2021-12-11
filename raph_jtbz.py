@@ -5,6 +5,7 @@ from dataloader import *
 from finance import *
 import pandas as pd
 import pageviewapi 
+from tqdm import tqdm
 
 from finance import stock, compare
 from quotebankexploration import *
