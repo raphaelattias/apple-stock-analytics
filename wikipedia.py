@@ -275,9 +275,10 @@ def get_speakers_labels_one_file():
 # ----------------------------------------------------------------- #
 
 def find_labels(speakers_id, wiki_data):
+    tqdm.pandas
 
     speakers_id_new = speakers_id.copy()
-    speakers_label = speakers_id.qids.apply(lambda ids: wiki_label_speaker(ids, wiki_data))
+    speakers_label = speakers_id.qids.progress_apply(lambda ids: wiki_label_speaker(ids, wiki_data))
     speakers_id_new['label'] = speakers_label
 
     return speakers_id_new

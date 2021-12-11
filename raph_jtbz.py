@@ -24,6 +24,7 @@ if __name__ == "__main__":
     year = 2015
 
     # DO NOT TOUCH
+    tqdm.pandas()
     path = os.path.join('data/wiki_speaker_attributes/speakers_pageviews_'+str(year))
     speakers_labels[str(year)] = speakers_labels.label.progress_apply(lambda label: get_page_views_per_year(label, year))
     speakers_labels.to_pickle(path)
