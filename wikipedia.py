@@ -36,7 +36,6 @@ def get_speakers_ids(quotes):
 
     # Copy the data frame
     wiki_quotes = quotes.copy()
-    all_indices = wiki_quotes.index
 
     # Apply the string filter and drop all the duplicates
     wiki_quotes['qids'] = wiki_quotes['qids'].apply(pandas_process).astype('|S')
@@ -275,7 +274,7 @@ def get_speakers_labels_one_file():
 # ----------------------------------------------------------------- #
 
 def find_labels(speakers_id, wiki_data):
-    tqdm.pandas
+    tqdm.pandas()
 
     speakers_id_new = speakers_id.copy()
     speakers_label = speakers_id.qids.progress_apply(lambda ids: wiki_label_speaker(ids, wiki_data))
