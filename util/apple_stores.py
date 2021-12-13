@@ -10,7 +10,12 @@ import numpy as np
 
 def fig_world():
   df = pd.read_pickle('data/apple_stores/stores.pkl')
-  fig = go.Figure(go.Scattergeo(lat=df['latitude'],lon=df['longitude'], text=df['location']))
+  fig = go.Figure(go.Scattergeo(lat=df['latitude'],
+                                lon=df['longitude'], 
+                                text=df['location'],
+                                marker = dict(color = 'rgb(30, 50, 170)')
+                                )
+  )
   fig.update_geos(projection_scale=0.8)
   #fig.update_layout(height=800, margin={"r":0,"t":0,"l":0,"b":0})
   fig['data'][0]['showlegend'] = True
@@ -29,7 +34,7 @@ def fig_world():
               showland=True,
               showcountries=True,
               landcolor='rgb(243, 243, 243)',
-              countrycolor='rgb(204, 204, 204)'
+              countrycolor='rgb(170, 170, 170)'
           ),
         updatemenus=[dict(type='buttons', showactive=True,
                                   y=0.95,
