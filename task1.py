@@ -33,6 +33,7 @@ def task1(quotes):
   stock = yf.download(stock_name, start=f'{year_start}-09-01', end=f'{year_end}-05-31', progress = False)
   stock.reset_index(inplace=True)
 
+  quotes = get_filtered_quotes()
   quotes.rename({'quotation': 'Quotation'}, axis = 1, inplace=True)
   q1 = 0.98
   q2 = 0.98

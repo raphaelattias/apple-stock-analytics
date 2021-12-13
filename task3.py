@@ -26,7 +26,7 @@ def task3(quotes):
     stock = yf.download(stock_name, start=f'{year_start}-01-01', end=f'{year_end}-12-31', progress = False)
     stock.reset_index(inplace=True)
 
-    quotes = pd.concat([load_quotes(i, 'processed quotes') for i in range(year_start,year_end+1)])
+    quotes = get_filtered_quotes()
     quotes.rename({'quotation': 'Quotation'}, axis = 1, inplace=True)
     
     analyzer = SentimentIntensityAnalyzer()
@@ -109,7 +109,7 @@ def task3(quotes):
     ##########
 
 
-# Initialize figure
+    # Initialize figure
 
 
     all_quotes_per_day = pos_per_day.merge(neg_per_day,how="right",on="date").merge(neut_per_day,how="left",on="date")
