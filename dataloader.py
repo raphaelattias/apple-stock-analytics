@@ -60,7 +60,7 @@ def filter_quotes(path, keywords = {}, speakers = [""], chunksize = 1000, save =
         pd.dataframe: Filtered panda dataframe
     """
     
-    assert keywords != {} and speakers !=  [""], "The keywords and speakers are empty lists, nothing to filter."
+    assert (keywords != {} and speakers !=  [""], "The keywords and speakers are empty lists, nothing to filter.")
 
     if save != None:
         save_path = os.path.join("data/processed_quotes/", save+'.pkl')
@@ -211,7 +211,28 @@ def get_filtered_quotes():
     return filtered_quotes
 
 
+
 # ----------------------------------------------------------------- #
+
+
+def get_speakers_pageviews():
+
+    # Initialize the path
+    path = 'data/wiki_speaker_attributes/speakers_pageviews.pkl'
+    path = os.path.join(os.getcwd(), path)
+
+    if not os.path.isfile(path):
+        download(path,'wiki speakers attributes')
+
+    speakers_pageviews = pd.read_pickle('data/wiki_speaker_attributes/speakers_pageviews.pkl')
+
+    return speakers_pageviews
+
+
+
+
+# ----------------------------------------------------------------- #
+
 
 
 def get_dictionnary():
@@ -264,7 +285,8 @@ def get_dictionnary():
             'part-00012-0d587965-3d8f-41ce-9771-5b8c9024dce9-c000.snappy': '1lskprayUi9mB1U12fDpd2wsklwhV4g5r',
             'part-00013-0d587965-3d8f-41ce-9771-5b8c9024dce9-c000.snappy': '15d1Xb7aLhQ_tJ_Mc9O5O5NuRlkvZd1Ar',
             'part-00014-0d587965-3d8f-41ce-9771-5b8c9024dce9-c000.snappy': '1ciVEdCJdJ-ymSpEr1x9Xg3yQvXaug56k',
-            'part-00015-0d587965-3d8f-41ce-9771-5b8c9024dce9-c000.snappy': '1DSYYRitpC3NwEL0S5uijas0QRXrH505E'
+            'part-00015-0d587965-3d8f-41ce-9771-5b8c9024dce9-c000.snappy': '1DSYYRitpC3NwEL0S5uijas0QRXrH505E',
+            'speakers_pageviews.pkl' : '1dFU-92I-upV9BMhMryGBvYmmpwAgM2Sk'
         }
     }
 
