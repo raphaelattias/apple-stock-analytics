@@ -23,17 +23,16 @@ pio.renderers.default = "notebook_connected"
 
 from statsmodels.tsa.seasonal import seasonal_decompose
 from statsmodels.tsa.stattools import adfuller
-def task1():
+def task1(quotes):
 
   stock_name = "AAPL"
-  year = 2019
-  year_start = 2015
-  year_end = 2019
+  year = 2008
+  year_start = 2008
+  year_end = 2020
   # Find the days of high volatility 
-  stock = yf.download(stock_name, start=f'{year_start}-01-01', end=f'{year_end}-12-31', progress = False)
+  stock = yf.download(stock_name, start=f'{year_start}-09-01', end=f'{year_end}-05-31', progress = False)
   stock.reset_index(inplace=True)
 
-  quotes = pd.concat([load_quotes(i, 'processed quotes') for i in range(year_start,year_end+1)])
   quotes.rename({'quotation': 'Quotation'}, axis = 1, inplace=True)
   q1 = 0.98
   q2 = 0.98
@@ -149,51 +148,12 @@ def task1():
 
   #######
 
-  ######
-
-  from statsmodels.tsa.seasonal import seasonal_decompose
-  from statsmodels.tsa.stattools import adfuller
-
-  analysis = stock.copy()
-  analysis.set_index('Date',inplace=True)
-  analysis = analysis['Open']
-  decompose_result_mult = seasonal_decompose(analysis, model="additive",period=12)
-
-  trend = decompose_result_mult.trend
-  seasonal = decompose_result_mult.seasonal
-  residual = decompose_result_mult.resid
-
-  p_value = adfuller(residual.dropna())[1]
-  print(f"p-value : {p_value}")
-
-  decompose_result_mult.plot();
 ######
   best_value = 1
   for period in range(1,125):
     analysis = stock.copy()
     analysis.set_index('Date',inplace=True)
-    analysis = analysis['Volume']
-    decompose_result_mult = seasonal_decompose(analysis, model="additive",period=period)
-
-    trend = decompose_result_mult.trend
-    seasonal = decompose_result_mult.seasonal
-    residual = decompose_result_mult.resid
-
-    p_value = adfuller(residual.dropna())[1]
-
-    if p_value < best_value:
-      best_period = period
-      best_value = p_value
-
-  print(best_period,best_value)
-
-
-######
-  best_value = 1
-  for period in range(1,125):
-    analysis = stock.copy()
-    analysis.set_index('Date',inplace=True)
-    analysis = analysis['Volume']
+    analysis = analysis['Liquidity']
     decompose_result_mult = seasonal_decompose(analysis, model="additive",period=period)
 
     trend = decompose_result_mult.trend
@@ -216,7 +176,7 @@ def task1():
 
 
   fig = make_subplots(specs=[[{"secondary_y": True}]])
-  fig.add_trace(go.Bar(x=daily_quotes['Date'], y=daily_quotes['Quotation'], name = "Number of quotations" ))
+  fig.add_trace(go.Scatter(x=daily_quotes['Date'], y=px.scatter(x=daily_quotes['Date'], y=daily_quotes['Quotation'],trendline="rolling", trendline_options=dict(window=10)).data[1]['y'], name = "Number of quotations" ))
   fig.add_trace(go.Scatter(x=stock['Date'], y=stock['Open'], name = f"{stock_name} stock price"),secondary_y=True)
   fig.update_traces(marker_line_width = 0,
                   selector=dict(type="bar"))

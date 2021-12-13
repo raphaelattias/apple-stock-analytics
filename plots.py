@@ -1,7 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from wordcloud import WordCloud, STOPWORDS
+from wordcloud import WordCloud, STOPWORDS, ImageColorGenerator
+from PIL import Image
 
+import plotly.graph_objs as go
 alpha_ = 0.7
 figsize = [10.0, 6.0]
 DPI = 250
@@ -91,16 +93,71 @@ def plot_wordcloud(text):
             tokens[i] = tokens[i].lower()
 
         comment_words += " ".join(tokens)+" "
-
-    wordcloud = WordCloud(width = 800, height = 800,
-                    background_color ='white',
-                    stopwords = stopwords,
-                    min_font_size = 10).generate(comment_words)
+    
+    mask = np.array(Image.open("figures/apple_logo_black.png"))
+    wordcloud = WordCloud(height=4000, width=1000, mode = "RGBA",
+                    background_color = "White",
+                    stopwords = stopwords, colormap="copper").generate(comment_words)
 
     # plot the WordCloud image                      
-    plt.figure(figsize = (8, 8), facecolor = None)
+    plt.figure(figsize = (32, 8), facecolor = None)
     plt.imshow(wordcloud)
     plt.axis("off")
     plt.tight_layout(pad = 0)
+    plt.savefig('figures/wordcloud.png')
+    plt.show()   
 
-    plt.show()    
+
+    #plot_wordcloud(' '.join(quotes[quotes.speaker == "steve jobs"].quotation).split(" "))
+
+
+def plotly_wordcloud(text):
+    wc = WordCloud(stopwords = set(STOPWORDS),
+                   max_words = 200,
+                   max_font_size = 100)
+    wc.generate(text)
+    
+    word_list=[]
+    freq_list=[]
+    fontsize_list=[]
+    position_list=[]
+    orientation_list=[]
+    color_list=[]
+
+    for (word, freq), fontsize, position, orientation, color in wc.layout_:
+        word_list.append(word)
+        freq_list.append(freq)
+        fontsize_list.append(fontsize)
+        position_list.append(position)
+        orientation_list.append(orientation)
+        color_list.append(color)
+        
+    # get the positions
+    x=[]
+    y=[]
+    for i in position_list:
+        x.append(i[0])
+        y.append(i[1])
+            
+    # get the relative occurence frequencies
+    new_freq_list = []
+    for i in freq_list:
+        new_freq_list.append(i*100)
+    new_freq_list
+    
+    trace = go.Scatter(x=x, 
+                       y=y, 
+                       textfont = dict(size=new_freq_list,
+                                       color=color_list),
+                       hoverinfo='text',
+                       hovertext=['{0}{1}'.format(w, f) for w, f in zip(word_list, freq_list)],
+                       mode='text',  
+                       text=word_list
+                      )
+    
+    layout = go.Layout({'xaxis': {'showgrid': False, 'showticklabels': False, 'zeroline': False},
+                        'yaxis': {'showgrid': False, 'showticklabels': False, 'zeroline': False}})
+    
+    fig = go.Figure(data=[trace], layout=layout)
+    
+    return fig 
