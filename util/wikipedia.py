@@ -11,7 +11,7 @@ import numpy as np
 import pageviewapi 
 from tqdm import tqdm
 
-from dataloader import *
+from util.dataloader import *
 
 
 # ----------------------------------------------------------------- #
