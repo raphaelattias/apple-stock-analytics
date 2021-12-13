@@ -5,7 +5,7 @@ import os
 from tqdm.notebook import tqdm
 from tqdm import trange
 import gdown
-from quotebankexploration import *
+from util.quotebankexploration import *
 
 # conda install -c conda-forge ipywidgets
 # conda install tqdm
@@ -60,8 +60,6 @@ def filter_quotes(path, keywords = {}, speakers = [""], chunksize = 1000, save =
         pd.dataframe: Filtered panda dataframe
     """
     
-    assert (keywords != {} and speakers !=  [""], "The keywords and speakers are empty lists, nothing to filter.")
-
     if save != None:
         save_path = os.path.join("data/processed_quotes/", save+'.pkl')
         if os.path.isfile(save_path):

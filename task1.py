@@ -1,10 +1,10 @@
 # Useful starting lines
 import numpy as np
-from dataloader import *
-from plots import *
-from finance import stock, compare
-from quotebankexploration import *
-from wikipedia import *
+from util.dataloader import *
+from util.plots import *
+from util.finance import stock, compare
+from util.quotebankexploration import *
+from util.wikipedia import *
 import yfinance as yf
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -23,193 +23,212 @@ pio.renderers.default = "notebook_connected"
 
 from statsmodels.tsa.seasonal import seasonal_decompose
 from statsmodels.tsa.stattools import adfuller
-def task1(quotes):
 
-  stock_name = "AAPL"
-  year = 2008
-  year_start = 2008
-  year_end = 2020
-  # Find the days of high volatility 
-  stock = yf.download(stock_name, start=f'{year_start}-09-01', end=f'{year_end}-05-31', progress = False)
-  stock.reset_index(inplace=True)
+def load_stock(stock_name = "AAPL",year_start = 2008,year_end= 2020):
+    stock = yf.download(stock_name, start=f'{year_start}-09-01', end=f'{year_end}-05-31', progress = False)
+    stock.reset_index(inplace=True)
+    stock['Liquidity'] = stock['Volume']*(stock['Close']+stock['Open'])/2
 
-  quotes = get_filtered_quotes()
-  quotes.rename({'quotation': 'Quotation'}, axis = 1, inplace=True)
-  q1 = 0.98
-  q2 = 0.98
+    return stock
 
+def high_volatility(stock, quantile=0.98):
+    stock['Volatility'] = stock.apply(lambda x: x['Liquidity'] > np.quantile(stock[stock.Date.dt.year == x.Date.year]['Liquidity'], q = quantile), axis=1)
+    stock['Volatility'] = stock.Volatility.apply(lambda x : "Volatile" if x else "Regular")
 
-  stock['Liquidity'] = stock['Open']*stock['Volume']
-  stock['Volatility'] = stock.apply(lambda x: x['Liquidity'] > np.quantile(stock[stock.Date.dt.year == x.Date.year]['Liquidity'], q = q1), axis=1)
-  stock['Volatility'] = stock.Volatility.apply(lambda x : "Volatile" if x else "Regular")
+    return stock
 
+def weekly_liquidity(stock, quantile=0.98):
+    weekly = pd.DataFrame(stock.resample('W', on='Date')['Liquidity'].sum())
+    weekly.index.rename('Date')
+    weekly.reset_index(inplace=True)
+    weekly = high_volatility(weekly, quantile)
+    pio.renderers.default = "notebook_connected"
 
-  ######
+    year_start = stock.Date.dt.year.min()
+    year_end = stock.Date.dt.year.max()
+    fig = px.bar(weekly, x='Date', y='Liquidity', color='Volatility', title=f"Liquidity traded for the $AAPL stock between {year_start} and {year_end}")
+    fig.update_xaxes(
+        rangeslider_visible=True,
+        rangeselector=dict(
+            buttons=list([
+                dict(count=1, label="1m", step="month", stepmode="backward"),
+                dict(count=6, label="6m", step="month", stepmode="backward"),
+                dict(count=1, label="1y", step="year", stepmode="backward"),
+                dict(step="all")
+            ])
+        )
+    )
+    fig.update_traces(marker_line_width = 0,
+                        selector=dict(type="bar"))
 
+    fig.update_layout(bargap=0.1,
+                        bargroupgap = 0,
+                    )
+    fig.show()
+    fig.write_html("figures/liquidity.html")
 
-  weekly = pd.DataFrame(stock.resample('W', on='Date')['Liquidity'].sum())
-  weekly['Volume'] = stock.resample('W', on='Date')['Volume'].sum()
-  weekly.index.rename('Date')
-  weekly.reset_index(inplace=True)
-  weekly['Volatility'] = weekly.apply(lambda x: x['Liquidity'] > np.quantile(weekly[weekly.Date.dt.year == x.Date.year]['Liquidity'], q = q1), axis=1)
-
-  pio.renderers.default = "notebook_connected"
-  fig = px.bar(stock, x='Date', y='Liquidity', color='Volatility', title=f"Liquidity traded for the ${stock_name} stock between {year_start} and {year_end}")
-  fig.update_xaxes(
-      rangeslider_visible=True,
-      rangeselector=dict(
-          buttons=list([
-              dict(count=1, label="1m", step="month", stepmode="backward"),
-              dict(count=6, label="6m", step="month", stepmode="backward"),
-              dict(count=1, label="1y", step="year", stepmode="backward"),
-              dict(step="all")
-          ])
-      )
-  )
-  fig.update_traces(marker_line_width = 0,
+def daily_stock_price(stock, quantile=0.98):
+    year_start = stock.Date.dt.year.min()
+    year_end = stock.Date.dt.year.max()
+    pio.renderers.default = "notebook_connected"
+    fig = px.bar(stock, x='Date', y='Open', color='Volatility', title=f"Daily Stock Price for the $AAPL stock between {year_start} and {year_end}")
+    fig.update_xaxes(
+        rangeslider_visible=True,
+        rangeselector=dict(
+            buttons=list([
+                dict(count=1, label="1m", step="month", stepmode="backward"),
+                dict(count=6, label="6m", step="month", stepmode="backward"),
+                dict(count=1, label="1y", step="year", stepmode="backward"),
+                dict(step="all")
+            ])
+        )
+    )
+    fig.update_traces(marker_line_width = 0,
                     selector=dict(type="bar"))
 
-  fig.update_layout(bargap=0.1,
+    fig.update_layout(bargap=0.1,
                     bargroupgap = 0,
-                  )
-  fig.show()
-  fig.write_html("figures/liquidity.html")
+                    )
+    fig.show()
+    fig.write_html("figures/stock_price.html")
 
-  ######
+def daily_quotes(quotes, quantile = 0.98):
+    daily_quotes = pd.DataFrame(quotes.groupby(quotes.date.dt.date).quotation.count())
+    daily_quotes.index.rename('Date')
+    daily_quotes.reset_index(inplace=True)
+    daily_quotes.rename({'date': 'Date'}, axis=1, inplace=True)
+    daily_quotes['Date']= pd.to_datetime(daily_quotes['Date'], errors='coerce')
+    daily_quotes['Yearly Percentile'] = daily_quotes.apply(lambda x: x['quotation'] > np.quantile(daily_quotes[daily_quotes.Date.dt.year == x.Date.year]['quotation'], q = quantile), axis=1)
+    daily_quotes['Yearly Percentile'] = daily_quotes['Yearly Percentile'].apply(lambda x : f"Top {int(100-quantile*100)}%" if x else f"Lower {int(quantile*100)}%")
+    pio.renderers.default = "notebook_connected"
 
-
- 
-  pio.renderers.default = "notebook_connected"
-  fig = px.bar(stock, x='Date', y='Open', color='Volatility', title=f"Daily Stock Price for the ${stock_name} stock between {year_start} and {year_end}")
-  fig.update_xaxes(
-      rangeslider_visible=True,
-      rangeselector=dict(
-          buttons=list([
-              dict(count=1, label="1m", step="month", stepmode="backward"),
-              dict(count=6, label="6m", step="month", stepmode="backward"),
-              dict(count=1, label="1y", step="year", stepmode="backward"),
-              dict(step="all")
-          ])
-      )
-  )
-  fig.update_traces(marker_line_width = 0,
+    year_start = quotes.date.dt.year.min()
+    year_end = quotes.date.dt.year.max()
+    fig = px.bar(daily_quotes, x='Date', y='quotation', color='Yearly Percentile', title=f"Daily Number of quotes related to Apple between {year_start} and {year_end}")
+    fig.update_xaxes(
+        rangeslider_visible=True,
+        rangeselector=dict(
+            buttons=list([
+                dict(count=1, label="1m", step="month", stepmode="backward"),
+                dict(count=6, label="6m", step="month", stepmode="backward"),
+                dict(count=1, label="1y", step="year", stepmode="backward"),
+                dict(step="all")
+            ])
+        )
+    )
+    fig.update_traces(marker_line_width = 0,
                     selector=dict(type="bar"))
 
-  fig.update_layout(bargap=0.1,
+    fig.update_layout(bargap=0.1,
                     bargroupgap = 0,
-                  )
-  fig.show()
-  fig.write_html("figures/stock_price.html")
+                    )
+    fig.show()
+    fig.write_html("figures/daily_quotes.html")
 
 
-  ######
+    quantile = 0.98
+
+def seasonal_analysis(df, column="Liquidity"):
+    best_p_value = 1
+    analysis = df.copy()
+    analysis = analysis[column]
+    for period in tqdm(range(5,125)):
+        decompose_result_mult = seasonal_decompose(analysis, model="additive",period=period)
+        residual = decompose_result_mult.resid
+
+        p_value = adfuller(residual.dropna())[1]
+
+        if p_value < best_p_value:
+            best_period = period
+            best_p_value = p_value
+
+    print(f"The {column} can be fitted with a seasonal model of period {best_period} with p_value {best_p_value}")
 
 
-  daily_quotes = pd.DataFrame(quotes.groupby(quotes.date.dt.date).Quotation.count())
-  daily_quotes.index.rename('Date')
-  daily_quotes.reset_index(inplace=True)
-  daily_quotes.rename({'date': 'Date'}, axis=1, inplace=True)
-  daily_quotes['Date']= pd.to_datetime(daily_quotes['Date'], errors='coerce')
-  daily_quotes['Yearly Percentile'] = daily_quotes.apply(lambda x: x['Quotation'] > np.quantile(daily_quotes[daily_quotes.Date.dt.year == x.Date.year]['Quotation'], q = q2), axis=1)
-  daily_quotes['Yearly Percentile'] = daily_quotes['Yearly Percentile'].apply(lambda x : f"Top {int(100-q2*100)}%" if x else f"Lower {int(q2*100)}%")
-  
-  #daily_quotes['High Count'] = daily_quotes['Quotation'] > np.quantile(daily_quotes['Quotation'], q = q2)
-
-
-  pio.renderers.default = "notebook_connected"
-  fig = px.bar(daily_quotes, x='Date', y='Quotation', color='Yearly Percentile', title=f"Daily Number of quotes related to Apple between {year_start} and {year_end}")
-  fig.update_xaxes(
-      rangeslider_visible=True,
-      rangeselector=dict(
-          buttons=list([
-              dict(count=1, label="1m", step="month", stepmode="backward"),
-              dict(count=6, label="6m", step="month", stepmode="backward"),
-              dict(count=1, label="1y", step="year", stepmode="backward"),
-              dict(step="all")
-          ])
-      )
-  )
-  fig.update_traces(marker_line_width = 0,
-                    selector=dict(type="bar"))
-
-  fig.update_layout(bargap=0.1,
-                    bargroupgap = 0,
-                  )
-  fig.show()
-  fig.write_html("figures/daily_quotes.html")
-
-  # ax1 = sns.set_style(style="white", rc=None )
-  # fig, ax1 = plt.subplots(figsize=(12,6))
-  # daily_quotes.date = pd.to_datetime(daily_quotes.date, format='%Y-%m-%d')
-  # sns.barplot(x= daily_quotes['date'], y= daily_quotes['Quotation'], ax = ax1, color='green')
-  # sns.barplot(x= daily_quotes['date'], y= daily_quotes[daily_quotes.High Count]['Quotation'], ax = ax1, color='red')
-  # ax1.xaxis.set_major_locator(matplotlib.dates.AutoDateLocator())
-  # x_dates = daily_quotes['date'].dt.strftime('%Y-%m').sort_values().unique()
-  # ax1.set_xticklabels(labels = x_dates, rotation=45, ha='right')
-
-  #######
-
-######
-  best_value = 1
-  for period in range(1,125):
-    analysis = stock.copy()
-    analysis.set_index('Date',inplace=True)
-    analysis = analysis['Liquidity']
-    decompose_result_mult = seasonal_decompose(analysis, model="additive",period=period)
+    decompose_result_mult = seasonal_decompose(analysis, model="additive",period=best_period)
 
     trend = decompose_result_mult.trend
     seasonal = decompose_result_mult.seasonal
     residual = decompose_result_mult.resid
 
-    p_value = adfuller(residual.dropna())[1]
+    seasonal = pd.DataFrame({'date': df.Date, 'trend': trend, 'seasonal': seasonal, 'residual': residual})
+    year_start = seasonal.date.dt.year.min()
+    year_end = seasonal.date.dt.year.max()
+    pio.renderers.default = "notebook_connected"
 
-    if p_value < best_value:
-      best_period = period
-      best_value = p_value
+    fig = make_subplots(rows=3, cols=1, subplot_titles=("Trend", "Seasonal Component", "Model residuals"), )
 
-  print(best_period,best_value)
+    fig.append_trace(go.Scatter(
+        x=seasonal.date,
+        y=seasonal.trend
+    ), row=1, col=1)
 
-  ####
-  # layout = go.Layout(
-  #     barmode='stack',
-  #     title='Stacked Bar with Pandas'
-  # )
+    fig.append_trace(go.Scatter(
+        x=seasonal.date,
+        y=seasonal.seasonal,
+    ), row=2, col=1)
 
+    fig.append_trace(go.Scatter(
+        x=seasonal.date,
+        y=seasonal.residual,
+    ), row=3, col=1)
 
-  fig = make_subplots(specs=[[{"secondary_y": True}]])
-  fig.add_trace(go.Scatter(x=daily_quotes['Date'], y=px.scatter(x=daily_quotes['Date'], y=daily_quotes['Quotation'],trendline="rolling", trendline_options=dict(window=10)).data[1]['y'], name = "Number of quotations" ))
-  fig.add_trace(go.Scatter(x=stock['Date'], y=stock['Open'], name = f"{stock_name} stock price"),secondary_y=True)
-  fig.update_traces(marker_line_width = 0,
-                  selector=dict(type="bar"))
-  fig.update_xaxes(title_text="Date")
-  fig.update_yaxes(title_text="Quotations", secondary_y=False)
-  fig.update_yaxes(title_text="Price in USD$", secondary_y=True)
-  fig.update_layout(bargap=0.1,
-                  bargroupgap = 0,
-                  title=f"Stock price of ${stock_name} compared to the number of quotations related to Apple from {year_start} to {year_end}."
-                  )
-  #fig = go.Figure(data=data, layout=layout)
-  fig.update_xaxes(
-      rangeslider_visible=True,
-      rangeselector=dict(
-          buttons=list([
-              dict(count=1, label="1m", step="month", stepmode="backward"),
-              dict(count=6, label="6m", step="month", stepmode="backward"),
-              dict(count=1, label="1y", step="year", stepmode="backward"),
-              dict(step="all")
-          ])
-      )
-  )
-  # IPython notebook
-  fig.show()
-  fig.write_html("figures/daily_quotes_related_Apple_stock.html")
+    fig.update_layout(title_text=f"Fitting of {column} with seasonal component of period {best_period} days",showlegend=False)
+    fig['layout']['yaxis2']['title']=f'{column} in $'
+    fig['layout']['yaxis1']['title']=f'{column} in $'
+    fig['layout']['yaxis3']['title']=f'{column} in $'
 
-  ####
+    fig.show()
+    fig.write_html("figures/seasonal_analysis.html")
 
-  stock_to_keep = stock[stock.Date.isin(set(stock.Date).intersection(set(daily_quotes.Date)))]
-  daily_quotes_to_keep = daily_quotes[daily_quotes.Date.isin(set(stock.Date).intersection(set(daily_quotes.Date)))]
+def stock_price_with_quotes(stock, quotes, quantile = 0.98):
+    daily_quotes = pd.DataFrame(quotes.groupby(quotes.date.dt.date).quotation.count())
+    daily_quotes.index.rename('Date')
+    daily_quotes.reset_index(inplace=True)
+    daily_quotes.rename({'date': 'Date'}, axis=1, inplace=True)
+    daily_quotes['Date']= pd.to_datetime(daily_quotes['Date'], errors='coerce')
+    daily_quotes['Yearly Percentile'] = daily_quotes.apply(lambda x: x['quotation'] > np.quantile(daily_quotes[daily_quotes.Date.dt.year == x.Date.year]['quotation'], q = quantile), axis=1)
+    daily_quotes['Yearly Percentile'] = daily_quotes['Yearly Percentile'].apply(lambda x : f"Top {int(100-quantile*100)}%" if x else f"Lower {int(quantile*100)}%")
 
-  pearsonr(stock_to_keep.Liquidity,daily_quotes_to_keep.Quotation)
+    year_start = quotes.date.dt.year.min()
+    year_end = quotes.date.dt.year.max()
+    fig = make_subplots(specs=[[{"secondary_y": True}]])
+    fig.add_trace(go.Scatter(x=daily_quotes['Date'], y=daily_quotes.quotation, name = "Number of quotations" ))
+    fig.add_trace(go.Scatter(x=stock['Date'], y=stock['Open'], name = f"AAPL stock price"),secondary_y=True)
+    fig.update_traces(marker_line_width = 0,
+                    selector=dict(type="bar"))
+    fig.update_xaxes(title_text="Date")
+    fig.update_yaxes(title_text="Quotations", secondary_y=False)
+    fig.update_yaxes(title_text="Price in USD$", secondary_y=True)
+    fig.update_layout(bargap=0.1,
+                    bargroupgap = 0,
+                    title=f"Stock price of $AAPL compared to the number of quotations related to Apple from {year_start} to {year_end}."
+                    )
+    #fig = go.Figure(data=data, layout=layout)
+    fig.update_xaxes(
+        rangeslider_visible=True,
+        rangeselector=dict(
+            buttons=list([
+                dict(count=1, label="1m", step="month", stepmode="backward"),
+                dict(count=6, label="6m", step="month", stepmode="backward"),
+                dict(count=1, label="1y", step="year", stepmode="backward"),
+                dict(step="all")
+            ])
+        )
+    )
+    # IPython notebook
+    fig.show()
+    fig.write_html("figures/daily_quotes_related_Apple_stock.html")
 
+def pearson_stock_quotes(stock,quotes):
+    stock = stock.rename({'Date':'date'},axis=1)
+    quotes = pd.DataFrame(quotes.groupby(quotes.date.dt.date).quotation.count())
+    quotes.reset_index(inplace=True)
+    quotes['date']= pd.to_datetime(quotes['date'], errors='coerce')
+    intersection = pd.Index(set(stock.date.dt.date).intersection(set(quotes.date.dt.date)))
+    stock = stock[stock.date.dt.date.isin(intersection)]
+    quotes = quotes[quotes.date.dt.date.isin(intersection)]
 
-  return None
+    correlation, p_value = pearsonr(stock['Liquidity'],quotes['quotation'])
+
+    return correlation, p_value

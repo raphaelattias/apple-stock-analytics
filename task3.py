@@ -4,17 +4,15 @@ import seaborn as sns
 import matplotlib
 import numpy as np
 import yfinance as yf
-from dataloader import *
+from util.dataloader import *
 import plotly.express as px
 import plotly.graph_objects as go
 import plotly.offline as py
 from plotly.subplots import make_subplots
 
 
-from ipywidgets import interactive, HBox, VBox, Checkbox
 
 #Vader
-import vaderSentiment
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
 def task3(quotes):
