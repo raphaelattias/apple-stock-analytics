@@ -32,8 +32,8 @@ def load_stock(stock_name = "AAPL",year_start = 2008,year_end= 2020):
     return stock
 
 def high_volatility(stock, quantile=0.98):
-    stock['Volatility'] = stock.apply(lambda x: x['Liquidity'] > np.quantile(stock[stock.Date.dt.year == x.Date.year]['Liquidity'], q = quantile), axis=1)
-    stock['Volatility'] = stock.Volatility.apply(lambda x : "Volatile" if x else "Regular")
+    stock['Yearly Percentile'] = stock.apply(lambda x: x['Liquidity'] > np.quantile(stock[stock.Date.dt.year == x.Date.year]['Liquidity'], q = quantile), axis=1)
+    stock['Yearly Percentile'] = stock['Yearly Percentile'].apply(lambda x : f"Top {int(100-quantile*100)}%" if x else f"Lower {int(quantile*100)}%")
 
     return stock
 
@@ -46,7 +46,11 @@ def weekly_liquidity(stock, quantile=0.98):
 
     year_start = stock.Date.dt.year.min()
     year_end = stock.Date.dt.year.max()
-    fig = px.bar(weekly, x='Date', y='Liquidity', color='Volatility', title=f"Liquidity traded for the $AAPL stock between {year_start} and {year_end}")
+    fig = px.bar(weekly, x='Date', y='Liquidity', color='Yearly Percentile', title=f"Liquidity traded for the $AAPL stock between {year_start} and {year_end}",     \
+                    color_discrete_map={
+                    f"Top {int(100-quantile*100)}%": 'rgb(180,37,30)',
+                    f"Lower {int(quantile*100)}%": 'rgb(30,50,155)'
+                })
     fig.update_xaxes(
         rangeslider_visible=True,
         rangeselector=dict(
@@ -63,6 +67,8 @@ def weekly_liquidity(stock, quantile=0.98):
 
     fig.update_layout(bargap=0.1,
                         bargroupgap = 0,
+                        template='ggplot2',
+                        yaxis_title="Liquidity [$]"
                     )
     fig.show()
     fig.write_html("figures/liquidity.html")
@@ -71,7 +77,12 @@ def daily_stock_price(stock, quantile=0.98):
     year_start = stock.Date.dt.year.min()
     year_end = stock.Date.dt.year.max()
     pio.renderers.default = "notebook_connected"
-    fig = px.bar(stock, x='Date', y='Open', color='Volatility', title=f"Daily Stock Price for the $AAPL stock between {year_start} and {year_end}")
+    fig = px.bar(stock, x='Date', y='Open', color='Yearly Percentile', title=f"Daily Stock Price for the $AAPL stock between {year_start} and {year_end}", \
+                    color_discrete_map={
+                    f"Top {int(100-quantile*100)}%": 'rgb(180,37,30)',
+                    f"Lower {int(quantile*100)}%": 'rgb(30,50,155)'
+                }
+    )
     fig.update_xaxes(
         rangeslider_visible=True,
         rangeselector=dict(
@@ -88,6 +99,8 @@ def daily_stock_price(stock, quantile=0.98):
 
     fig.update_layout(bargap=0.1,
                     bargroupgap = 0,
+                    template='ggplot2',
+                    yaxis_title='Stock price [$]'
                     )
     fig.show()
     fig.write_html("figures/stock_price.html")
@@ -104,7 +117,12 @@ def daily_quotes(quotes, quantile = 0.98):
 
     year_start = quotes.date.dt.year.min()
     year_end = quotes.date.dt.year.max()
-    fig = px.bar(daily_quotes, x='Date', y='quotation', color='Yearly Percentile', title=f"Daily Number of quotes related to Apple between {year_start} and {year_end}")
+    fig = px.bar(daily_quotes, x='Date', y='quotation', color='Yearly Percentile', title=f"Daily Number of quotes related to Apple between {year_start} and {year_end}",
+                    color_discrete_map={
+                    f"Top {int(100-quantile*100)}%": 'rgb(180,37,30)',
+                    f"Lower {int(quantile*100)}%": 'rgb(30,50,155)'
+                }
+    )
     fig.update_xaxes(
         rangeslider_visible=True,
         rangeselector=dict(
@@ -121,6 +139,8 @@ def daily_quotes(quotes, quantile = 0.98):
 
     fig.update_layout(bargap=0.1,
                     bargroupgap = 0,
+                    template = 'ggplot2',
+                    yaxis_title="Quotations count"
                     )
     fig.show()
     fig.write_html("figures/daily_quotes.html")
@@ -160,23 +180,29 @@ def seasonal_analysis(df, column="Liquidity"):
 
     fig.append_trace(go.Scatter(
         x=seasonal.date,
-        y=seasonal.trend
+        y=seasonal.trend,
+        marker = dict(color = 'rgb(30, 50, 155)')
     ), row=1, col=1)
 
     fig.append_trace(go.Scatter(
         x=seasonal.date,
         y=seasonal.seasonal,
+        marker = dict(color = 'rgb(25,125,35)')
     ), row=2, col=1)
 
     fig.append_trace(go.Scatter(
         x=seasonal.date,
         y=seasonal.residual,
+        marker = dict(color = 'rgb(180,37,30)')
     ), row=3, col=1)
 
-    fig.update_layout(title_text=f"Fitting of {column} with seasonal component of period {best_period} days",showlegend=False)
-    fig['layout']['yaxis2']['title']=f'{column} in $'
-    fig['layout']['yaxis1']['title']=f'{column} in $'
-    fig['layout']['yaxis3']['title']=f'{column} in $'
+    fig.update_layout(title_text=f"Fitting of {column} with seasonal component of period {best_period} days",
+                    showlegend=False,
+                    template = 'ggplot2'
+    )
+    fig['layout']['yaxis2']['title']=f'{column} [$]'
+    fig['layout']['yaxis1']['title']=f'{column} [$]'
+    fig['layout']['yaxis3']['title']=f'{column} [$]'
 
     fig.show()
     fig.write_html("figures/seasonal_analysis.html")
@@ -193,16 +219,28 @@ def stock_price_with_quotes(stock, quotes, quantile = 0.98):
     year_start = quotes.date.dt.year.min()
     year_end = quotes.date.dt.year.max()
     fig = make_subplots(specs=[[{"secondary_y": True}]])
-    fig.add_trace(go.Scatter(x=daily_quotes['Date'], y=daily_quotes.quotation, name = "Number of quotations" ))
-    fig.add_trace(go.Scatter(x=stock['Date'], y=stock['Open'], name = f"AAPL stock price"),secondary_y=True)
+    fig.add_trace(go.Scatter(x=daily_quotes['Date'], 
+                            y=daily_quotes.quotation, 
+                            name = "Number of quotations",
+                            marker = dict(color = 'rgb(30, 50, 155)')
+                            )
+    )
+    fig.add_trace(go.Scatter(x=stock['Date'], 
+                            y=stock['Open'], 
+                            name = f"AAPL stock price",
+                            marker = dict(color = 'rgb(180,37,30)')
+                            ),
+                secondary_y=True
+    )
     fig.update_traces(marker_line_width = 0,
                     selector=dict(type="bar"))
     fig.update_xaxes(title_text="Date")
-    fig.update_yaxes(title_text="Quotations", secondary_y=False)
-    fig.update_yaxes(title_text="Price in USD$", secondary_y=True)
+    fig.update_yaxes(title_text="Quotations count", secondary_y=False)
+    fig.update_yaxes(title_text="Stock price [$]", secondary_y=True)
     fig.update_layout(bargap=0.1,
                     bargroupgap = 0,
-                    title=f"Stock price of $AAPL compared to the number of quotations related to Apple from {year_start} to {year_end}."
+                    title=f"Stock price of $AAPL compared to the number of quotations related to Apple from {year_start} to {year_end}.",
+                    template = 'ggplot2'
                     )
     #fig = go.Figure(data=data, layout=layout)
     fig.update_xaxes(
