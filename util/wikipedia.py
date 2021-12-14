@@ -61,7 +61,7 @@ def get_speakers_ids(quotes):
 # for the speaker attributes in one big file. The goal is not to keep
 # a big file and keep surching for information inside, we will do a
 # filtering with all the qids of all the speakers we have.
-def concat_wiki_files():
+def get_wiki_labels():
     
     # Initialization of the files variable
     files = []
