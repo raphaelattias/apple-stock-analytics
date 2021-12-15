@@ -26,7 +26,7 @@ def download(path, category):
     filename = os.path.split(path)[-1]
 
     # Get the dictionnary of all the file adresses from our google drive
-    files = get_drive_dictionnary()
+    files = get_dictionnary()
 
 
     url = f'https://drive.google.com/uc?id={files[category][filename]}'
@@ -182,7 +182,7 @@ def get_filtered_quotes():
     path = os.path.join(os.getcwd(), path)
 
     # Get the filtered quotes dictionnary
-    filt_quotes_dict = get_drive_dictionnary()[category]
+    filt_quotes_dict = get_dictionnary()[category]
 
     # Get a loop over all the filtered quotes
     for key in filt_quotes_dict:
@@ -219,44 +219,21 @@ def get_speakers_pageviews():
     path = 'data/wiki_speaker_attributes/speakers_pageviews.pkl'
     path = os.path.join(os.getcwd(), path)
 
-    # Set the category
-    category = 'speakers attributes'
-
     if not os.path.isfile(path):
-        download(path, category)
+        download(path,'wiki speakers attributes')
 
     speakers_pageviews = pd.read_pickle('data/wiki_speaker_attributes/speakers_pageviews.pkl')
 
     return speakers_pageviews
 
 
-# ----------------------------------------------------------------- #
-
-
-def get_speakers_labels():
-
-    # Initialize the path
-    path = 'data/wiki_speaker_attributes/speakers_labels.pkl'
-    path = os.path.join(os.getcwd(), path)
-
-    # Set the category
-    category = 'speakers attributes'
-
-    if not os.path.isfile(path):
-        download(path, category)
-
-    speakers_labels = pd.read_pickle('data/wiki_speaker_attributes/speakers_labels.pkl')
-
-    return speakers_labels
-
-
 
 
 # ----------------------------------------------------------------- #
 
 
 
-def get_drive_dictionnary():
+def get_dictionnary():
 
     # Dictionnary
     files = {
@@ -309,8 +286,7 @@ def get_drive_dictionnary():
             'part-00015-0d587965-3d8f-41ce-9771-5b8c9024dce9-c000.snappy': '1DSYYRitpC3NwEL0S5uijas0QRXrH505E',
         },
         'speakers attributes': {
-            'speakers_pageviews.pkl' : '1dFU-92I-upV9BMhMryGBvYmmpwAgM2Sk',
-            'speakers_labels.pkl': '1FIvRNItqIW5s7fPKOoZFGCxD6keBi1av'
+            'speakers_pageviews.pkl' : '1dFU-92I-upV9BMhMryGBvYmmpwAgM2Sk'
         },
     }
 
