@@ -190,7 +190,7 @@ def task3():
                         method="update",
 
                         args=[{"visible": [True, False, False, False]},
-                            {"title": "All quotes"}]),
+                            {"title": ")"}]),
                     dict(label="Negative",
                         method="update",
                         args=[{"visible": [True, True, False, False]},
@@ -293,19 +293,6 @@ def task3():
     # Set title
     fig.update_layout(
         title_text="Negative Quotes",
-        xaxis_domain=[0.05, 1.0],
-        yaxis_range =[0,ymax],
-        xaxis_title_text='Date', # xaxis label
-        yaxis_title_text='Frequency of quotes', # yaxis label
-        bargap=0.1,
-        bargroupgap = 0
-    )
-    fig.update_traces(marker_line_width = 0,  selector=dict(type="bar"))
-    fig.show()
-
-    # Set title
-    fig.update_layout(
-        title_text="All quotes",
         xaxis_domain=[0.05, 1.0],
         yaxis_range =[0,ymax],
         xaxis_title_text='Date', # xaxis label

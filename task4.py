@@ -129,3 +129,5 @@ def plot_prediction(stock, quotes_sentiment, pred):
                     )
     fig.show()
 
+    fig.write_html('figures/future_stock_prediction.html')
+
