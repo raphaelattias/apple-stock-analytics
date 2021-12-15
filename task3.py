@@ -1,21 +1,29 @@
+# Useful starting lines
+import numpy as np
+from util.dataloader import *
+from util.plots import *
+from util.finance import stock, compare
+from util.quotebankexploration import *
+from util.wikipedia import *
+import yfinance as yf
 import matplotlib.pyplot as plt
 import pandas as pd
-import seaborn as sns
 import matplotlib
-import numpy as np
-import yfinance as yf
-from util.dataloader import *
-import plotly.express as px
-import plotly.graph_objects as go
-import plotly.offline as py
-from plotly.subplots import make_subplots
+import seaborn as sns
+import math
 
+import plotly.graph_objects as go
+import plotly.io as pio
+import plotly.express as px
+from plotly.subplots import make_subplots
+from scipy.stats import pearsonr
+import numpy as np
 
 
 #Vader
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
-def task3(quotes):
+def task3():
     stock_name = "AAPL"
     year = 2019
     year_start = 2015
@@ -23,6 +31,7 @@ def task3(quotes):
     # Find the days of high volatility 
     stock = yf.download(stock_name, start=f'{year_start}-01-01', end=f'{year_end}-12-31', progress = False)
     stock.reset_index(inplace=True)
+    stock['Liquidity'] = stock['Volume']*(stock['Close']+stock['Open'])/2
 
     quotes = get_filtered_quotes()
     quotes.rename({'quotation': 'Quotation'}, axis = 1, inplace=True)
@@ -63,8 +72,27 @@ def task3(quotes):
     neg_per_day.reset_index(inplace=True)
 
     ############
+    # correlation 
+    pos_per_day.rename({'date': 'Date'}, axis=1, inplace=True)
+    pos_per_day['Date']= pd.to_datetime(pos_per_day['Date'], errors='coerce')
+    stock_to_keep = stock[stock.Date.isin(set(stock.Date).intersection(set(pos_per_day.Date)))]
+    pos_per_day_to_keep = pos_per_day[pos_per_day.Date.isin(set(stock.Date).intersection(set(pos_per_day.Date)))]
+    print("Pearson pos", pearsonr(stock_to_keep.Liquidity,pos_per_day_to_keep.sentiment))
+    
+    neg_per_day.rename({'date': 'Date'}, axis=1, inplace=True)
+    neg_per_day['Date']= pd.to_datetime(neg_per_day['Date'], errors='coerce')
+    stock_to_keep = stock[stock.Date.isin(set(stock.Date).intersection(set(neg_per_day.Date)))]
+    neg_per_day_to_keep = neg_per_day[neg_per_day.Date.isin(set(stock.Date).intersection(set(neg_per_day.Date)))]
+    print("Pearson neg", pearsonr(stock_to_keep.Liquidity,neg_per_day_to_keep.sentiment))
 
-    fig = px.bar(pos_per_day, x=pos_per_day['date'], y=pos_per_day['sentiment'])
+    neut_per_day.rename({'date': 'Date'}, axis=1, inplace=True)
+    neut_per_day['Date']= pd.to_datetime(neut_per_day['Date'], errors='coerce')
+    stock_to_keep = stock[stock.Date.isin(set(stock.Date).intersection(set(neut_per_day.Date)))]
+    neut_per_day_to_keep = neut_per_day[neut_per_day.Date.isin(set(stock.Date).intersection(set(neut_per_day.Date)))]
+    print("Pearson neut", pearsonr(stock_to_keep.Liquidity,neut_per_day_to_keep.sentiment))
+    
+
+    fig = px.bar(pos_per_day, x=pos_per_day['Date'], y=pos_per_day['sentiment'])
     fig.update_layout(
     title={
             'text' : 'Distribution of the positive quotes according to time',
@@ -84,7 +112,7 @@ def task3(quotes):
     fig.show()
 
 
-    fig = px.bar(neg_per_day, x=neg_per_day['date'], y=neg_per_day['sentiment'])
+    fig = px.bar(neg_per_day, x=neg_per_day['Date'], y=neg_per_day['sentiment'])
     fig.update_layout(
     title={
             'text' : 'Distribution of the negative quotes according to time',
@@ -110,8 +138,8 @@ def task3(quotes):
     # Initialize figure
 
 
-    all_quotes_per_day = pos_per_day.merge(neg_per_day,how="right",on="date").merge(neut_per_day,how="left",on="date")
-    all_quotes_per_day.Date = all_quotes_per_day.date.apply(lambda x : str(x))
+    all_quotes_per_day = pos_per_day.merge(neg_per_day,how="right",on="Date").merge(neut_per_day,how="left",on="Date")
+    all_quotes_per_day.Date = all_quotes_per_day.Date.apply(lambda x : str(x))
     all_quotes_per_day.rename({"sentiment_x": "Positive", "sentiment_y": "Negative", "sentiment":"Neutral"},axis=1,inplace=True)
     all_quotes_per_day['All'] = all_quotes_per_day.Positive + all_quotes_per_day.Negative + all_quotes_per_day.Neutral
 
@@ -122,28 +150,28 @@ def task3(quotes):
     # Add Traces
 
     fig.add_trace(
-        go.Bar(x=all_quotes_per_day.date,
+        go.Bar(x=all_quotes_per_day.Date,
                 y=all_quotes_per_day.All,
                 name="All",
                 marker_color='rgb(30,50,130)', opacity = 0.5,))
     fig['data'][0]['showlegend'] = True
     fig['data'][0]['name']='All'
     fig.add_trace(
-        go.Bar(x=all_quotes_per_day.date,
+        go.Bar(x=all_quotes_per_day.Date,
                 y=all_quotes_per_day.Negative,
                 name="Negative",
                 visible=False,
                 marker_color='rgb(165,37,30)'))
 
     fig.add_trace(
-        go.Bar(x=all_quotes_per_day.date,
+        go.Bar(x=all_quotes_per_day.Date,
                 y=all_quotes_per_day.Positive,
                 name="Positive",
                 visible = False,
                 marker_color='rgb(50,120,70)'))
 
     fig.add_trace(
-        go.Bar(x=all_quotes_per_day.date,
+        go.Bar(x=all_quotes_per_day.Date,
                 y=all_quotes_per_day.Neutral,
                 name="Neutral",
                 visible=False,
@@ -211,7 +239,7 @@ def task3(quotes):
 # Initialize figure
 
 
-    all_quotes_per_day.date = all_quotes_per_day.date.apply(lambda x : str(x))
+    all_quotes_per_day.Date = all_quotes_per_day.Date.apply(lambda x : str(x))
     all_quotes_per_day.rename({"sentiment_x": "Positive", "sentiment_y": "Negative", "sentiment":"Neutral"},axis=1,inplace=True)
 
     #all_quotes_per_day.Positive=(all_quotes_per_day.Positive-all_quotes_per_day.Positive.mean())/all_quotes_per_day.Positive.std()
@@ -225,14 +253,14 @@ def task3(quotes):
     # Add Traces
 
     fig.add_trace(
-        go.Bar(x=all_quotes_per_day.date,
+        go.Bar(x=all_quotes_per_day.Date,
                 y=all_quotes_per_day.Negative,
                 name="Negative",
                     visible=True,
                 marker_color="red"))
 
     fig.add_trace(
-        go.Bar(x=all_quotes_per_day.date,
+        go.Bar(x=all_quotes_per_day.Date,
                 y=all_quotes_per_day.Positive,
                 name="Positive",
                 visible = False,
