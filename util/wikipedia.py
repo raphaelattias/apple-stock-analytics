@@ -350,8 +350,26 @@ def add_labels(speakers_id, wiki_data, save = False, cluster = None):
 # ----------------------------------------------------------------- #
 
 
-def get_score_quotes(quotes, speakers_label):
-    return 0
+
+def scoring(quotes):
+    try:
+        score = quotes[str(quotes['year'])]
+    except:
+        score = None
+    return score
+
+
+# ----------------------------------------------------------------- #
+
+
+def get_score_quotes(quotes, speakers_pageviews):
+    quotes_score = quotes.copy()
+    quotes_score['year'] = quotes_score.date.apply(lambda date: date.year)
+    quotes_score = quotes_score.set_index('speaker').join(speakers_pageviews.set_index('speaker'), lsuffix="_left", rsuffix="_right").reset_index()
+    quotes_score = quotes_score[quotes_score.year >= 2015].copy()
+    quotes_score['score'] = quotes_score.apply(scoring, axis = 1)
+    quotes_score = quotes_score.drop(['2015', '2016', '2017', '2018', '2019', '2020', 'year'], axis = 1).reset_index(drop = True)
+    return quotes_score
 
 
 
@@ -361,6 +379,5 @@ def get_score_quotes(quotes, speakers_label):
 def get_speakers_pageviews_per_year(speakers_labels):
     speakers_pageviews = speakers_labels.copy()
     for year in range(2015, 2021):
-        print('Process for year ', year)
-        speakers_pageviews[str(year)] = speakers_pageviews.label.progress_apply(lambda label: get_pageviews_per_year(label, year))
+        speakers_pageviews[str(year)] = speakers_pageviews.label.apply(lambda label: get_pageviews_per_year(label, year))
     return speakers_pageviews
