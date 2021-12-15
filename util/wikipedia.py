@@ -13,6 +13,8 @@ from tqdm import tqdm
 
 from util.dataloader import *
 
+tqdm.pandas()
+
 
 # ----------------------------------------------------------------- #
 
@@ -51,6 +53,9 @@ def get_speakers_ids(quotes):
     wiki_quotes = wiki_quotes.dropna()
     wiki_quotes = wiki_quotes.drop(wiki_quotes[wiki_quotes.speaker == 'None'].index).reset_index(drop = True)
 
+    # Transform it into a data frame
+    wiki_quotes = pd.DataFrame(wiki_quotes)
+
     # Return the result
     return wiki_quotes
 
@@ -74,7 +79,7 @@ def get_wiki_labels():
     path = os.path.join(os.getcwd(), path)
 
     # Get the dictionniary conatining all the adresses
-    wiki_dict = get_dictionnary()[category]
+    wiki_dict = get_drive_dictionnary()[category]
 
     # Loop over all the wiki files containing speaker attributes
     for key in wiki_dict:
@@ -120,7 +125,7 @@ def remove_duplicates(df, column_name):
 
 
 
-def get_page_views_per_year(page, year):
+def get_pageviews_per_year(page, year):
 
     nb_page_views = None
 
@@ -151,7 +156,7 @@ def get_page_views_per_year(page, year):
 
 
 def get_total_page_views(page):
-    page_views = np.array([get_page_views_per_year(page, year) for year in range(wiki_page_year(page), 2021)])
+    page_views = np.array([get_pageviews_per_year(page, year) for year in range(wiki_page_year(page), 2021)])
     total_nb = np.sum(page_views)
     return total_nb
 
@@ -163,7 +168,7 @@ def get_total_page_views(page):
 def exist_wiki_page_for_year(speaker, year):
 
     try :
-        get_page_views_per_year(speaker, year)
+        get_pageviews_per_year(speaker, year)
         return True
 
     except:
@@ -216,7 +221,7 @@ def wiki_label_speaker(ids, wiki_data):
             speaker = wiki_data.label[wiki_data.id == id].reset_index(drop = True).values[0]
             total_page_views = get_total_page_views(speaker)
 
-            if exist_wiki_page(speaker) and total_page_views > prev_nb_views:
+            if (exist_wiki_page(speaker) and total_page_views > prev_nb_views) or label == None:
                 label = speaker
                 prev_nb_views = total_page_views
         except:
@@ -274,7 +279,6 @@ def get_speakers_labels_one_file():
 # ----------------------------------------------------------------- #
 
 def find_labels(speakers_id, wiki_data):
-    tqdm.pandas()
 
     speakers_id_new = speakers_id.copy()
     speakers_label = speakers_id.qids.progress_apply(lambda ids: wiki_label_speaker(ids, wiki_data))
@@ -344,3 +348,36 @@ def add_labels(speakers_id, wiki_data, save = False, cluster = None):
 
 
 # ----------------------------------------------------------------- #
+
+
+
+def scoring(quotes):
+    try:
+        score = quotes[str(quotes['year'])]
+    except:
+        score = None
+    return score
+
+
+# ----------------------------------------------------------------- #
+
+
+def get_score_quotes(quotes, speakers_pageviews):
+    quotes_score = quotes.copy()
+    quotes_score['year'] = quotes_score.date.apply(lambda date: date.year)
+    quotes_score = quotes_score.set_index('speaker').join(speakers_pageviews.set_index('speaker'), lsuffix="_left", rsuffix="_right").reset_index()
+    quotes_score = quotes_score[quotes_score.year >= 2015].copy()
+    quotes_score['score'] = quotes_score.apply(scoring, axis = 1)
+    quotes_score = quotes_score.drop(['2015', '2016', '2017', '2018', '2019', '2020', 'year'], axis = 1).reset_index(drop = True)
+    return quotes_score
+
+
+
+# ----------------------------------------------------------------- #
+
+
+def get_speakers_pageviews_per_year(speakers_labels):
+    speakers_pageviews = speakers_labels.copy()
+    for year in range(2015, 2021):
+        speakers_pageviews[str(year)] = speakers_pageviews.label.apply(lambda label: get_pageviews_per_year(label, year))
+    return speakers_pageviews
