@@ -111,12 +111,14 @@ def plot_prediction(stock, quotes_sentiment, pred):
                         mode='lines',
                         name='Lower Prediction',
                         marker_color='rgb(165,37,30)'))
+                        
     fig.add_trace(go.Scatter(x=df.ds, y=df.yhat_lower,
                         mode='lines',
                         name='Upper Prediction',
                         marker_color='rgb(50,120,70)',
                         fillcolor='rgba(68, 68, 68, 0.3)',
                         fill='tonexty'))
+
     fig.add_vline(x='2018-01-01', line_width=2, line_dash="dash", line_color="black")
 
     fig.update_layout(

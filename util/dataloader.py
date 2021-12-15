@@ -284,8 +284,10 @@ def get_dictionnary():
             'part-00013-0d587965-3d8f-41ce-9771-5b8c9024dce9-c000.snappy': '15d1Xb7aLhQ_tJ_Mc9O5O5NuRlkvZd1Ar',
             'part-00014-0d587965-3d8f-41ce-9771-5b8c9024dce9-c000.snappy': '1ciVEdCJdJ-ymSpEr1x9Xg3yQvXaug56k',
             'part-00015-0d587965-3d8f-41ce-9771-5b8c9024dce9-c000.snappy': '1DSYYRitpC3NwEL0S5uijas0QRXrH505E',
+        },
+        'speakers attributes': {
             'speakers_pageviews.pkl' : '1dFU-92I-upV9BMhMryGBvYmmpwAgM2Sk'
-        }
+        },
     }
 
     # Return the final files
