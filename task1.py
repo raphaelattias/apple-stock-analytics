@@ -216,6 +216,10 @@ def stock_price_with_quotes(stock, quotes, quantile = 0.98):
     daily_quotes['Yearly Percentile'] = daily_quotes.apply(lambda x: x['quotation'] > np.quantile(daily_quotes[daily_quotes.Date.dt.year == x.Date.year]['quotation'], q = quantile), axis=1)
     daily_quotes['Yearly Percentile'] = daily_quotes['Yearly Percentile'].apply(lambda x : f"Top {int(100-quantile*100)}%" if x else f"Lower {int(quantile*100)}%")
 
+    intersection = pd.Index(set(stock.Date.dt.date).intersection(set(daily_quotes.Date.dt.date)))
+    stock = stock[stock.Date.isin(intersection)]
+    daily_quotes = daily_quotes[daily_quotes.Date.isin(intersection)]
+
     year_start = quotes.date.dt.year.min()
     year_end = quotes.date.dt.year.max()
     fig = make_subplots(specs=[[{"secondary_y": True}]])
