@@ -32,13 +32,20 @@ def pandas_process(input):
 
 # ----------------------------------------------------------------- #
 
-''' !!! TO SUPRESS !!! '''
-
 # This function is here to get all the ID of the different speakers in 
 # the wiki data set. The idea is to have list of all the person that
 # have spoken in Quotebank da  ta set and keep only the wikipedia 
 # information we want. 
 def get_speakers_ids(quotes):
+    """
+
+
+    Args:
+        quotes (pd.Dataframe): 
+
+    Returns:
+        (pd.Dataframe): 
+    """
 
     # Copy the data frame
     wiki_quotes = quotes.copy()

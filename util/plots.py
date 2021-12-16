@@ -259,7 +259,7 @@ def split_quote(quote):
     Args:
         quote (object): row of the dataframe we want to change 
     Return:
-        new_quote (object): row of the dataframe with the new format for quotation
+        (object): row of the dataframe with the new format for quotation
     """    
     new_quote = quote.copy()
     quote_cut = str()
