@@ -2,7 +2,6 @@
 import numpy as np
 from util.dataloader import *
 from util.plots import *
-from util.finance import stock, compare
 from util.quotebankexploration import *
 from util.wikipedia import *
 import yfinance as yf
@@ -23,17 +22,7 @@ import numpy as np
 #Vader
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
-def task3():
-    stock_name = "AAPL"
-    year = 2019
-    year_start = 2015
-    year_end = 2020
-    # Find the days of high volatility 
-    stock = yf.download(stock_name, start=f'{year_start}-01-01', end=f'{year_end}-12-31', progress = False)
-    stock.reset_index(inplace=True)
-    stock['Liquidity'] = stock['Volume']*(stock['Close']+stock['Open'])/2
-
-    quotes = get_filtered_quotes()
+def predict_sentiment(quotes):
     quotes.rename({'quotation': 'Quotation'}, axis = 1, inplace=True)
     
     analyzer = SentimentIntensityAnalyzer()
@@ -55,17 +44,12 @@ def task3():
             return(-1) 
         else : return(0) 
 
-
-    # determine the sentiment of a quote in a corpus (return the score which is normalized between -1(most extreme negative) and +1 (most extreme positive))
-    def sentiment_score(quote) : 
-        return analyzer.polarity_scores(quote)['compound']        
-
     quotes['sentiment'] = quotes['Quotation'].apply(sentiment) 
 
-    # plot the distribution of the sentiments in the corpus 
-    df_sent = quotes.groupby(['sentiment']).sum().reset_index()
+    return quotes
 
-    # separate the positive and negative quotes
+def correlation_stock_sentiment(quotes,stock):
+        # separate the positive and negative quotes
     pos_quotes = quotes[quotes['sentiment'] == 'positive']
     neg_quotes = quotes[quotes['sentiment'] == 'negative']
     neut_quotes = quotes[quotes['sentiment'] == 'neutral']
@@ -104,52 +88,35 @@ def task3():
     stock_to_keep = stock[stock.Date.isin(set(stock.Date).intersection(set(neut_per_day.Date)))]
     neut_per_day_to_keep = neut_per_day[neut_per_day.Date.isin(set(stock.Date).intersection(set(neut_per_day.Date)))]
     print("Pearson neut", pearsonr(stock_to_keep.Liquidity,neut_per_day_to_keep.sentiment))
+
+def fig_all_sentiments(quotes,stock):
+    stock_name = "AAPL"
+    # separate the positive and negative quotes
+    pos_quotes = quotes[quotes['sentiment'] == 'positive']
+    neg_quotes = quotes[quotes['sentiment'] == 'negative']
+    neut_quotes = quotes[quotes['sentiment'] == 'neutral']
+
+    # plot the distribution of the neutral quotes according to time
+    neut_per_day = pd.DataFrame(neut_quotes.groupby(neut_quotes.date.dt.date).count()['sentiment'])
+    neut_per_day.index.rename('Date')
+    neut_per_day.reset_index(inplace=True)
+    neut_per_day.rename({'date': 'Date'}, axis=1, inplace=True)
+    neut_per_day['Date']= pd.to_datetime(neut_per_day['Date'], errors='coerce')
     
+    # plot the distribution of the positive quotes according to time
+    pos_per_day = pd.DataFrame(pos_quotes.groupby(pos_quotes.date.dt.date).count()['sentiment'])
+    pos_per_day.index.rename('Date')
+    pos_per_day.reset_index(inplace=True)
+    pos_per_day.rename({'date': 'Date'}, axis=1, inplace=True)
+    pos_per_day['Date']= pd.to_datetime(pos_per_day['Date'], errors='coerce')
 
-    fig = px.bar(pos_per_day, x=pos_per_day['Date'], y=pos_per_day['sentiment'])
-    fig.update_layout(
-    title={
-            'text' : 'Distribution of the positive quotes according to time',
-            'x':0.5,
-            'xanchor': 'center'},
-    xaxis_title_text='date', # xaxis label
-    yaxis_title_text='frequency of positive quotes', # yaxis label
-    bargap=0.2, # gap between bars of adjacent location coordinates
-    bargroupgap=0.1 # gap between bars of the same location coordinates
-    )
-    fig.update_traces(marker_line_width = 0,
-                    selector=dict(type="bar"))
+    # plot the distribution of the negative quotes according to time
+    neg_per_day = pd.DataFrame(neg_quotes.groupby(neg_quotes.date.dt.date).count()['sentiment'])
+    neg_per_day.index.rename('Date')
+    neg_per_day.reset_index(inplace=True)
+    neg_per_day.rename({'date': 'Date'}, axis=1, inplace=True)
+    neg_per_day['Date']= pd.to_datetime(neg_per_day['Date'], errors='coerce')
 
-    fig.update_layout(bargap=0.1,
-                    bargroupgap = 0,
-                    )
-    fig.show()
-
-
-    fig = px.bar(neg_per_day, x=neg_per_day['Date'], y=neg_per_day['sentiment'])
-    fig.update_layout(
-    title={
-            'text' : 'Distribution of the negative quotes according to time',
-            'x':0.5,
-            'xanchor': 'center'},
-    xaxis_title_text='date', # xaxis label
-    yaxis_title_text='frequency of negative quotes', # yaxis label
-    bargap=0.2, # gap between bars of adjacent location coordinates
-    bargroupgap=0.1 # gap between bars of the same location coordinates
-    )
-    fig.update_traces(marker_line_width = 0,
-                    selector=dict(type="bar"))
-
-    fig.update_layout(bargap=0.1,
-                    bargroupgap = 0,
-                    )
-    fig.show()
-    fig.write_html("figures/pos_neg_neutral.html")
-
-    ##########
-
-
-    # Initialize figure
 
 
     all_quotes_per_day = pos_per_day.merge(neg_per_day,how="right",on="Date").merge(neut_per_day,how="left",on="Date")
@@ -157,6 +124,10 @@ def task3():
     all_quotes_per_day.rename({"sentiment_x": "Positive", "sentiment_y": "Negative", "sentiment":"Neutral"},axis=1,inplace=True)
     all_quotes_per_day['All'] = all_quotes_per_day.Positive + all_quotes_per_day.Negative + all_quotes_per_day.Neutral
 
+    all_quotes_per_day['All'] = all_quotes_per_day['All'].rolling(7, min_periods=1).mean().to_frame()
+    all_quotes_per_day['Positive'] = all_quotes_per_day['Positive'].rolling(7, min_periods=1).mean().to_frame()
+    all_quotes_per_day['Negative'] = all_quotes_per_day['Negative'].rolling(7, min_periods=1).mean().to_frame()
+    all_quotes_per_day['Neutral'] = all_quotes_per_day['Neutral'].rolling(7, min_periods=1).mean().to_frame()
 
     fig = go.Figure()
     ymax = all_quotes_per_day.All.max()
@@ -200,11 +171,10 @@ def task3():
                 x=1,
                 y=1.15,
                 buttons=list([
-                    dict(label="All",
+                    dict(label="All quotes",
                         method="update",
-
                         args=[{"visible": [True, False, False, False]},
-                            {"title": ")"}]),
+                            {"title": "All"}]),
                     dict(label="Negative",
                         method="update",
                         args=[{"visible": [True, True, False, False]},
@@ -236,6 +206,8 @@ def task3():
     fig.update_traces(marker_line_width = 0,
                     selector=dict(type="bar"))
 
+
+
     fig.update_xaxes(
         rangeslider_visible=True,
         rangeselector=dict(
@@ -249,8 +221,6 @@ def task3():
     )
     fig.show()
     fig.write_html("figures/all_quotes_sentiment.html")
-    ##########
-# Initialize figure
 
 
     all_quotes_per_day.Date = all_quotes_per_day.Date.apply(lambda x : str(x))
@@ -271,16 +241,16 @@ def task3():
                 y=all_quotes_per_day.Negative,
                 name="Negative",
                     visible=True,
-                marker_color="red"))
+                marker_color='rgb(165,37,30)'))
 
     fig.add_trace(
         go.Bar(x=all_quotes_per_day.Date,
                 y=all_quotes_per_day.Positive,
                 name="Positive",
                 visible = False,
-                marker_color="green"))
+                marker_color='rgb(50,120,70)'))
 
-    fig.add_trace(go.Scatter(x=stock['Date'], y=(stock['Close']-stock['Open']).interpolate(method="polynomial",order=5), name = f"{stock_name} stock price", visible=True, marker_color='blue'),secondary_y=True)
+    fig.add_trace(go.Scatter(x=stock['Date'], y=(stock['Open']).interpolate(method="polynomial",order=5), name = f"{stock_name} stock price", visible=True, marker_color='blue'),secondary_y=True)
 
 
     fig.update_layout(
@@ -289,8 +259,8 @@ def task3():
                 type="buttons",
                 direction="right",
                 active=0,
-                x=0.57,
-                y=1.2,
+                x=1,
+                y=1.15,
                 buttons=list([
                     dict(label="Negative",
                         method="update",
@@ -312,9 +282,25 @@ def task3():
         xaxis_title_text='Date', # xaxis label
         yaxis_title_text='Frequency of quotes', # yaxis label
         bargap=0.1,
-        bargroupgap = 0
+        bargroupgap = 0,
+            template = 'ggplot2'
+
     )
+
+    fig.update_yaxes( secondary_y=False, range=[0,1100])
+    fig.update_yaxes( secondary_y=True, range=[0,90])
+
     fig.update_traces(marker_line_width = 0,  selector=dict(type="bar"))
+
+    fig.update_xaxes(
+    rangeslider_visible=True,
+    rangeselector=dict(
+        buttons=list([
+            dict(count=1, label="1m", step="month", stepmode="backward"),
+            dict(count=6, label="6m", step="month", stepmode="backward"),
+            dict(count=1, label="1y", step="year", stepmode="backward"),
+            dict(step="all")
+        ])
+    )
+)
     fig.show()
-    
-    return None

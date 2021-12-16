@@ -125,7 +125,7 @@ def plot_prediction(stock, quotes_sentiment, pred):
                     template = 'ggplot2',
                     yaxis_title="Stock Price [$]",
                     xaxis_title = "Date",
-                    title = "Fitted model between 2015 and 2018, and predicted on 2019 for Apple stock price"
+                    title = "Fitted model between 2015 and 2017, and predicted on 2018 for Apple stock price"
                     )
     fig.show()
 
