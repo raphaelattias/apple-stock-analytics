@@ -135,7 +135,7 @@ def plot_wordcloud_speakers(quotes, speakers_pageviews, path = 'figures/wordclou
     
     mask = np.array(Image.open("figures/apple_logo_black.png"))
     wordcloud = WordCloud(height=2000, width=1000, mode = "RGBA",
-                    background_color = "White", colormap="copper",repeat=True).generate_from_frequencies(d)
+                    background_color = "White", colormap="cividis",repeat=True).generate_from_frequencies(d)
 
     # plot the WordCloud image                      
     plt.figure(figsize = (8,16), facecolor = None)
@@ -172,7 +172,6 @@ def plot_wordcloud(text, path = 'figures/wordcloud.png'):
 
         comment_words += " ".join(tokens)+" "
     
-    mask = np.array(Image.open("figures/apple_logo_black.png"))
     wordcloud = WordCloud(height=2000, width=1000, mode = "RGBA",
                     background_color = "White",
                     stopwords = stopwords, colormap="copper").generate(comment_words)
