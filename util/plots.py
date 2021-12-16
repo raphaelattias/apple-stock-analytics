@@ -17,6 +17,14 @@ tqdm.pandas()
 
 
 def bar_plots_quotes(frequency_all, frequency_apple, years):
+    """
+    Plot of the frequency of all the quotes from the quotebank compared to the quotes linked to Apple.
+
+    Inputs:
+        frequency_all (pd.Dataframe): frequency of all the quotes given in quotebank
+        frequency_apple (pd.Dataframe): frequency of the filtered quotes only concerning Apple
+        years (array<int>): array of all the years
+    """
     barwidth = 0.3
 
     position_1 = np.arange(len(years)) +  (barwidth / 2)
@@ -49,6 +57,15 @@ def bar_plots_quotes(frequency_all, frequency_apple, years):
 
 
 def plot_pie_numquote(quote_df, year, head_ = 5):
+    """
+    Pie plot of the distribution of the repartition of the number of quotes between the most frequent speaker
+        for a specific year.
+
+    Inputs:
+        quote_df (pd.Dataframe): Dataframe of quotes for the year chosen
+        year (int): year of study
+        head_ (int): number of most frequent speaker we want in the plot
+    """
     ax = plt.subplots(figsize=(6, 3), subplot_kw=dict(aspect="equal"))
     ax = quote_df.groupby("speaker")["quotation"].count().sort_values(ascending = False).drop(["none"]).head(head_).plot.pie()
     ax.set(ylabel = None)
@@ -64,6 +81,13 @@ def plot_pie_numquote(quote_df, year, head_ = 5):
 
 
 def plot_quotes_per_day(quote_df, year):
+    """
+    Plot the distribution of the number of quotes group by day for a specific year.
+
+    Inputs:
+        quote_df (pd.Dataframe): Dataframe of quotes for the year chosen
+        year (int): year of study
+    """
     quote_df.groupby("date")["quotation"].count().plot(alpha = alpha_)
     plt.title('Numbers of quotes per day in %i' %year)
     plt.ylabel("Number of quotes")
@@ -78,6 +102,13 @@ def plot_quotes_per_day(quote_df, year):
 
 
 def plot_numOcc_per_day(quote_df, year):
+    """
+    Plot the distribution of the number of occurrences of the quotes group by day for a specific year.
+
+    Inputs:
+        quote_df (pd.Dataframe): Dataframe of quotes for the year chosen
+        year (int): year of study
+    """
     quote_df.groupby("date").sum().plot(alpha = alpha_)
     plt.title('Numbers of occurrences of all the quotes per day in %i' %year)
     plt.ylabel("Number of occurrences")
@@ -98,6 +129,7 @@ def plot_wordcloud(text):
     Inputs:
         * text (pd.Series): text dataset used for generating the word cloud 
     """
+    
     comment_words = ''
     stopwords = set(STOPWORDS)
 
@@ -137,6 +169,12 @@ def plot_wordcloud(text):
 
 
 def plotly_wordcloud(text):
+    """
+    Plot the same Word Cloud as 'plot_wordcloud' using plotly this time.
+
+    Inputs:
+        * text (pd.Series): text dataset used for generating the word cloud 
+    """
     wc = WordCloud(stopwords = set(STOPWORDS),
                    max_words = 200,
                    max_font_size = 100)
@@ -192,6 +230,14 @@ def plotly_wordcloud(text):
 
 
 def split_quote(quote):
+    """
+    Rewrite the quotation from the quote row with a backline after each 10 words
+
+    Args:
+        quote (object): row of the dataframe we want to change 
+    Return:
+        new_quote (object): row of the dataframe with the new format for quotation
+    """    
     new_quote = quote.copy()
     quote_cut = str()
     words = quote.quotation.split()
@@ -211,13 +257,22 @@ def split_quote(quote):
 
 
 def plot_distrib_val_fame(quotes):
+    """
+    Plot the distribution of the valence and the fame of the speaker regarding some special days 
+        when some events linked to Apple append.
 
+    Inputs:
+        quotes (pd.Dataframe): Dataframe of quotes with pageviews colummn already added
+    """
+
+    # Create a copy of the dataframe
     quotes_df = quotes.copy()
 
+    # Apply the new format of quotation and change the sentiment by its real score using 'sentiment_score' function
     quotes_df = quotes_df.apply(split_quote, axis = 1)
     quotes_df.sentiment = quotes_df.quotation.progress_apply(sentiment_score)
 
-    #
+    # Create new dataframes for each days we choose 
     quotes_FBI = quotes_df[quotes_df.date >= '2016-02-19' ]
     quotes_FBI = quotes_FBI[quotes_FBI.date <= '2016-02-21']
 
@@ -236,6 +291,7 @@ def plot_distrib_val_fame(quotes):
     quotes_event_iPhone7 = quotes_df[quotes_df.date >= '2016-09-07']
     quotes_event_iPhone7 = quotes_event_iPhone7[quotes_event_iPhone7.date <= '2016-09-09']
 
+    # Create the figure by adding the scatter plot of sentiment score against pageviews for each speacial day
     fig = go.Figure()
     fig.add_trace(
         go.Scatter(x=quotes_FBI.sentiment,
@@ -296,6 +352,7 @@ def plot_distrib_val_fame(quotes):
                 name="iPhone 7")
         )
 
+    # Create the buttons for each day
     fig.update_layout(
             updatemenus=[
                 dict(
@@ -334,9 +391,12 @@ def plot_distrib_val_fame(quotes):
             ])
 
 
-    # 
+    # Set the name for the axis and the title (also set y in log scale)
     fig.update_xaxes(title_text="Sentiment")
     fig.update_yaxes(title_text="Pageviews", type="log")
-    fig.update_layout(title_text= "<b>Distribution of quotes according to its valence and the fame of the speaker</b> <br> <br> FBI–Apple encryption dispute (Feb 2016)",hoverlabel_align = 'left', xaxis_range=[-1.0, 1.0], template="none")
+    fig.update_layout(title_text= "<b>Distribution of quotes according to its valence and the fame of the speaker</b> <br> <br> FBI–Apple encryption dispute (Feb 2016)", title_y=0.95, hoverlabel_align = 'left', xaxis_range=[-1.0, 1.0], template="none")
 
-    return fig
+    fig.show()
+
+    # Save the plot in html
+    fig.write_html("figures/distribution_valence_fame.html")
