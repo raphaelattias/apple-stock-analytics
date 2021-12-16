@@ -20,7 +20,7 @@ def download(path, category):
 
     Args:
         path (string): Path to the dataset.
-        category (string):
+        category (string): category from the dictonnary
     """
 
     # Get the file name of what we are looking for
@@ -171,6 +171,12 @@ def load_quotes(year, category, limit = None, columns = None):
 # The idea here is to concatenated in one single dataframe all the
 # filtered quotes.
 def get_filtered_quotes():
+    """
+    Download all the filtered quotes (including a refiltering) from all the different years
+
+    Returns:
+        pd.Dataframe : Dataframe containing all the filtered quotes from 2008 to 2020
+    """
 
     # Initialize a list
     filtered_quotes = []
@@ -215,6 +221,12 @@ def get_filtered_quotes():
 
 
 def get_speakers_pageviews():
+    """
+    Download the Dataframe of quotes with the number of pageviews of speaker on the year the quote append
+
+    Returns:
+        pd.Dataframe: Dataframe with pageviews added as a new columns
+    """
 
     # Initialize the path
     path = 'data/wiki_speaker_attributes/speakers_pageviews.pkl'
@@ -235,6 +247,12 @@ def get_speakers_pageviews():
 
 
 def get_speakers_labels():
+    """
+    Download the Dataframe containing the speaker labels corresponding to the wikidata
+
+    Returns:
+        pd.Dataframe: Dataframe with the speaker labels added in a new columns
+    """
 
     # Initialize the path
     path = 'data/wiki_speaker_attributes/speakers_labels.pkl'
@@ -256,6 +274,12 @@ def get_speakers_labels():
 
 
 def get_drive_dictionnary():
+    """
+    Get the dictionnary containing all the keys to access the files on a Google Drive we need to downlaod
+
+    Returns:
+        dict: Dictonnary of all the files
+    """
 
     # Dictionnary
     files = {
