@@ -357,14 +357,22 @@ def scoring(quotes):
 
 # ----------------------------------------------------------------- #
 
-
-def get_score_quotes(quotes, speakers_pageviews):
+def get_pageview_quotes(quotes, speakers_pageviews):
     quotes_score = quotes.copy()
     quotes_score['year'] = quotes_score.date.apply(lambda date: date.year)
     quotes_score = quotes_score.set_index('speaker').join(speakers_pageviews.set_index('speaker'), lsuffix="_left", rsuffix="_right").reset_index()
     quotes_score = quotes_score[quotes_score.year >= 2015].copy()
     quotes_score['score'] = quotes_score.apply(scoring, axis = 1)
     quotes_score = quotes_score.drop(['2015', '2016', '2017', '2018', '2019', '2020', 'year'], axis = 1).reset_index(drop = True)
+    return quotes_score
+
+# ----------------------------------------------------------------- #
+
+
+def get_score_quotes(quotes, speakers_pageviews):
+    quotes_score = get_pageview_quotes(quotes, speakers_pageviews)
+    quotes_score.score = (quotes_score.score - quotes_score.score.min()) / (quotes_score.score.max() - quotes_score.score.min())
+
     return quotes_score
 
 
