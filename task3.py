@@ -46,6 +46,20 @@ def task3():
             return('negative') 
         else : return('neutral')  
 
+    # determine the sentiment of a quote in a corpus (+1, -1 or 0)
+    def sentiment_binary(quote) : 
+        vs = analyzer.polarity_scores(quote)['compound']
+        if (vs >=0.05) :
+            return(1)
+        if (vs <= - 0.05) :
+            return(-1) 
+        else : return(0) 
+
+
+    # determine the sentiment of a quote in a corpus (return the score which is normalized between -1(most extreme negative) and +1 (most extreme positive))
+    def sentiment_score(quote) : 
+        return analyzer.polarity_scores(quote)['compound']        
+
     quotes['sentiment'] = quotes['Quotation'].apply(sentiment) 
 
     # plot the distribution of the sentiments in the corpus 
