@@ -7,6 +7,9 @@ from util.sentiment_analysis import *
 from util.wikipedia import get_score_quotes
 import plotly.graph_objs as go
 from sklearn.utils import shuffle
+import plotly.io as pio
+from plotly.subplots import make_subplots
+from plotly.offline import iplot
 
 alpha_ = 0.7
 figsize = [10.0, 6.0]
@@ -281,7 +284,7 @@ def split_quote(quote):
 
 def plot_distrib_val_fame(quotes):
     """
-    Plot the distribution of the valence and the fame of the speaker regarding some special days 
+    Plot of the distribution of the valence and the fame of the speaker regarding some special days 
         when some events linked to Apple append.
 
     Inputs:
@@ -423,3 +426,102 @@ def plot_distrib_val_fame(quotes):
     
     # Save the plot in html
     fig.write_html("figures/distribution_valence_fame.html")
+
+
+
+# ----------------------------------------------------------------- #
+
+
+def stock_price_against_quotes_score(score_date, stock_all):
+    """
+    Plot of the positive and negative score of the quotes group per day related with the Apple's stock price.
+
+    Inputs:
+        score_date (pd.Dataframe): Dataframe of the quotes with the columns 'positive_score' and 'negative_score'
+        stock_all (pd.Dataframe): Dataframe of the stock market data
+    """
+
+    stock_analysis = stock_all.copy()
+
+    date_min = '2015-01-01'
+    stock_analysis = stock_analysis[stock_analysis.Date >= date_min]
+
+    date_max = '2020-04-16'
+    stock_analysis = stock_analysis[stock_analysis.Date <= date_max]
+
+    stock_analysis['stock_price'] = (stock_analysis.Open + stock_analysis.Low) / 2
+    
+
+
+    trace1 = go.Scatter(
+        x = score_date.date,
+        y = score_date.positive_score,
+        mode = 'lines',
+        name = 'Positive',
+        marker=dict(color='rgb(30,50,130)')
+    )
+
+    trace2 = go.Scatter(
+        x = score_date.date,
+        y = score_date.negative_score,
+        mode = 'lines',
+        name = 'Negative',
+        marker=dict(color='rgb(150,37,30)')
+    )
+
+    trace3 = go.Scatter(
+        x = stock_analysis.Date,
+        y = stock_analysis.stock_price,
+        mode = 'lines',
+        name = 'Stock',
+        # marker=dict(color='rgb(250,125,62)'),
+        marker=dict(color='rgb(25,125,35)'),
+        opacity = 0.4
+    )
+
+    pio.renderers.default = "notebook_connected"
+    fig = make_subplots(specs=[[{"secondary_y": True}]])
+    fig.add_trace(trace3, secondary_y=True)
+    fig.add_trace(trace1)
+    fig.add_trace(trace2)
+    fig['layout'].update(height = 600, 
+                            width = 800, 
+                            title = 'Distribution of the positive and negative score along <br> the years against the Apple stock price')
+    fig.update_traces(marker_line_width = 0,
+                    selector=dict(type="bar"))
+
+    max_quotes = max(-score_date.negative_score.min(), score_date.positive_score.max())
+    y_max_quotes = max_quotes + (max(-score_date.negative_score.min(), score_date.positive_score.max())/10)
+    y_min_quotes = -max_quotes + (max(-score_date.negative_score.min(), score_date.positive_score.max())/10)
+
+    max_stock = max(-stock_analysis.stock_price.min(), stock_analysis.stock_price.max()) + (max(-stock_analysis.stock_price.min(), stock_analysis.stock_price.max()) / 10)
+    y_max_stock = max_stock + (max(-stock_analysis.stock_price.min(), stock_analysis.stock_price.max()) / 10)
+    y_min_stock = -max_stock + (max(-stock_analysis.stock_price.min(), stock_analysis.stock_price.max()) / 10)
+
+    fig.update_xaxes(title_text = 'Date')
+    fig.update_yaxes(range=[y_min_quotes, y_max_quotes], 
+                        secondary_y=False, 
+                        title_text = 'Score'
+    )
+    fig.update_yaxes(range=[y_min_stock, 
+                        y_max_stock], 
+                        secondary_y=True,
+                        title_text = 'Stock price [$]'
+    )
+
+    fig.update_xaxes(
+        rangeslider_visible=True,
+        rangeselector=dict(
+            buttons=list([
+                dict(count=1, label="1m", step="month", stepmode="backward"),
+                dict(count=6, label="6m", step="month", stepmode="backward"),
+                dict(count=1, label="1y", step="year", stepmode="backward"),
+                dict(step="all")
+            ])
+        )
+    )
+
+    fig.update_layout(bargap=0.1, bargroupgap = 0, template='ggplot2', )
+    iplot(fig)
+
+    fig.write_html('figures/stock_price_against_quotes_score.html')
