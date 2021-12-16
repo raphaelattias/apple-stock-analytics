@@ -87,7 +87,7 @@ def get_wiki_labels():
     path = os.path.join(os.getcwd(), path)
 
     # Get the dictionniary conatining all the adresses
-    wiki_dict = get_dictionnary()[category]
+    wiki_dict = get_drive_dictionnary()[category]
 
     # Loop over all the wiki files containing speaker attributes
     for key in wiki_dict:
