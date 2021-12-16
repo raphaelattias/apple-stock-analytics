@@ -4,8 +4,9 @@ from wordcloud import WordCloud, STOPWORDS, ImageColorGenerator
 from PIL import Image
 from tqdm import tqdm
 from util.sentiment_analysis import *
-
+from util.wikipedia import get_score_quotes
 import plotly.graph_objs as go
+from sklearn.utils import shuffle
 
 alpha_ = 0.7
 figsize = [10.0, 6.0]
@@ -121,8 +122,34 @@ def plot_numOcc_per_day(quote_df, year):
 
 # ----------------------------------------------------------------- #
 
+def plot_wordcloud_speakers(quotes, speakers_pageviews, path = 'figures/wordcloud_speakers.png'):
+    def speakers_long_string(speaker,num):
+        string = ""
+        for i in range(num):
+            string += speaker + ","
+        return string
+
+    df = get_score_quotes(quotes, speakers_pageviews).groupby('label')['quotation'].count().to_frame().sort_values(by="quotation")
+    df.reset_index(inplace=True)
+    d = dict(zip(df.label, df.quotation))
     
-def plot_wordcloud(text): 
+    mask = np.array(Image.open("figures/apple_logo_black.png"))
+    wordcloud = WordCloud(height=2000, width=1000, mode = "RGBA",
+                    background_color = "White", colormap="copper",repeat=True).generate_from_frequencies(d)
+
+    # plot the WordCloud image                      
+    plt.figure(figsize = (8,16), facecolor = None)
+    plt.imshow(wordcloud)
+    plt.axis("off")
+    plt.tight_layout(pad = 0)
+    plt.savefig(path)
+    plt.show()   
+
+
+# ----------------------------------------------------------------- #
+
+
+def plot_wordcloud(text, path = 'figures/wordcloud.png'): 
     """
     Plot a Word Cloud for representing text data in which the size of each word indicates its frequency or importance.
 
@@ -142,23 +169,20 @@ def plot_wordcloud(text):
         # split the value
         tokens = val.split()
 
-        # Converts each token into lowercase
-        for i in range(len(tokens)):
-            tokens[i] = tokens[i].lower()
 
         comment_words += " ".join(tokens)+" "
     
     mask = np.array(Image.open("figures/apple_logo_black.png"))
-    wordcloud = WordCloud(height=4000, width=1000, mode = "RGBA",
+    wordcloud = WordCloud(height=2000, width=1000, mode = "RGBA",
                     background_color = "White",
                     stopwords = stopwords, colormap="copper").generate(comment_words)
 
     # plot the WordCloud image                      
-    plt.figure(figsize = (32, 8), facecolor = None)
+    plt.figure(figsize = (8,16), facecolor = None)
     plt.imshow(wordcloud)
     plt.axis("off")
     plt.tight_layout(pad = 0)
-    plt.savefig('figures/wordcloud.png')
+    plt.savefig(path)
     plt.show()   
 
 
@@ -397,6 +421,6 @@ def plot_distrib_val_fame(quotes):
     fig.update_layout(title_text= "<b>Distribution of quotes according to its valence and the fame of the speaker</b> <br> <br> FBI–Apple encryption dispute (Feb 2016)", title_y=0.95, hoverlabel_align = 'left', xaxis_range=[-1.0, 1.0], template="none")
 
     fig.show()
-
+    
     # Save the plot in html
     fig.write_html("figures/distribution_valence_fame.html")

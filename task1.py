@@ -216,6 +216,8 @@ def stock_price_with_quotes(stock, quotes, quantile = 0.98):
     daily_quotes['Yearly Percentile'] = daily_quotes.apply(lambda x: x['quotation'] > np.quantile(daily_quotes[daily_quotes.Date.dt.year == x.Date.year]['quotation'], q = quantile), axis=1)
     daily_quotes['Yearly Percentile'] = daily_quotes['Yearly Percentile'].apply(lambda x : f"Top {int(100-quantile*100)}%" if x else f"Lower {int(quantile*100)}%")
 
+    daily_quotes['quotation'] = daily_quotes['quotation'].rolling(7, min_periods=1).mean().to_frame()
+
     intersection = pd.Index(set(stock.Date.dt.date).intersection(set(daily_quotes.Date.dt.date)))
     stock = stock[stock.Date.isin(intersection)]
     daily_quotes = daily_quotes[daily_quotes.Date.isin(intersection)]
@@ -239,8 +241,8 @@ def stock_price_with_quotes(stock, quotes, quantile = 0.98):
     fig.update_traces(marker_line_width = 0,
                     selector=dict(type="bar"))
     fig.update_xaxes(title_text="Date")
-    fig.update_yaxes(title_text="Quotations count", secondary_y=False)
-    fig.update_yaxes(title_text="Stock price [$]", secondary_y=True)
+    fig.update_yaxes(title_text="Quotations count", secondary_y=False, range=[0,1100])
+    fig.update_yaxes(title_text="Stock price [$]", secondary_y=True, range=[0,90])
     fig.update_layout(bargap=0.1,
                     bargroupgap = 0,
                     title=f"Stock price of $AAPL compared to the number of quotations related to Apple from {year_start} to {year_end}.",
