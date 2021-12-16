@@ -23,7 +23,8 @@ import numpy as np
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
 def predict_sentiment(quotes):
-    quotes.rename({'quotation': 'Quotation'}, axis = 1, inplace=True)
+    new_quotes = quotes.copt()
+    new_quotes.rename({'quotation': 'Quotation'}, axis = 1, inplace=True)
     
     analyzer = SentimentIntensityAnalyzer()
     # determine the sentiment of a quote in a corpus (positive, negative or neutral)
@@ -44,9 +45,9 @@ def predict_sentiment(quotes):
             return(-1) 
         else : return(0) 
 
-    quotes['sentiment'] = quotes['Quotation'].apply(sentiment) 
+    new_quotes['sentiment'] = new_quotes['Quotation'].apply(sentiment) 
 
-    return quotes
+    return new_quotes
 
 def correlation_stock_sentiment(quotes,stock):
         # separate the positive and negative quotes

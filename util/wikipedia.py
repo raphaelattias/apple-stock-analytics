@@ -520,7 +520,7 @@ def stock_price_against_quotes_score(score_date, stock_all):
     fig.add_trace(trace2)
     fig['layout'].update(height = 600, 
                             width = 800, 
-                            title = 'Distribution of the positive and negative')
+                            title = 'Distribution of the positive and negative score along <br> the years against the Apple stock price')
     fig.update_traces(marker_line_width = 0,
                     selector=dict(type="bar"))
 
