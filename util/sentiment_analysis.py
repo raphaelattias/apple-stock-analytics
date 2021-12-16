@@ -52,7 +52,7 @@ def sentiment_binary(quote) :
     """    
     vs = sentiment(quote)
     if (vs == 'positive') :
-        return(1)
+        return 1
     if (vs == 'negative') :
-        return(-1) 
-    else : return(0)       
+        return -1 
+    else : return 0       

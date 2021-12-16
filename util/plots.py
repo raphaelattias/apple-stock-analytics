@@ -2,13 +2,16 @@ import numpy as np
 import matplotlib.pyplot as plt
 from wordcloud import WordCloud, STOPWORDS, ImageColorGenerator
 from PIL import Image
-from sentiment_analysis import *
+from tqdm import tqdm
+from util.sentiment_analysis import *
 
 import plotly.graph_objs as go
+
 alpha_ = 0.7
 figsize = [10.0, 6.0]
 DPI = 250
 
+tqdm.pandas()
 
 # ----------------------------------------------------------------- #
 
@@ -189,7 +192,7 @@ def plotly_wordcloud(text):
 
 
 def split_quote(quote):
-    new_quote = quote
+    new_quote = quote.copy()
     quote_cut = str()
     words = quote.quotation.split()
     i=1
@@ -202,6 +205,8 @@ def split_quote(quote):
     return new_quote
 
 
+
+
 # ----------------------------------------------------------------- #
 
 
@@ -209,8 +214,8 @@ def plot_distrib_val_fame(quotes):
 
     quotes_df = quotes.copy()
 
-    quotes_df.apply(split_quote, axis =1)
-    quotes_df.sentiment = quotes_df.quotation.apply(sentiment_score)
+    quotes_df = quotes_df.apply(split_quote, axis = 1)
+    quotes_df.sentiment = quotes_df.quotation.progress_apply(sentiment_score)
 
     #
     quotes_FBI = quotes_df[quotes_df.date >= '2016-02-19' ]

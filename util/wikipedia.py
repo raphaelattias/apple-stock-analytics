@@ -10,9 +10,11 @@ import pandas as pd
 import numpy as np
 import pageviewapi 
 from tqdm import tqdm
+from util.sentiment_analysis import *
 
 from util.dataloader import *
 
+tqdm.pandas()
 
 # ----------------------------------------------------------------- #
 
@@ -274,8 +276,6 @@ def get_speakers_labels_one_file():
 # ----------------------------------------------------------------- #
 
 def find_labels(speakers_id, wiki_data):
-    tqdm.pandas()
-
     speakers_id_new = speakers_id.copy()
     speakers_label = speakers_id.qids.progress_apply(lambda ids: wiki_label_speaker(ids, wiki_data))
     speakers_id_new['label'] = speakers_label
@@ -358,20 +358,20 @@ def scoring(quotes):
 # ----------------------------------------------------------------- #
 
 def get_pageview_quotes(quotes, speakers_pageviews):
-    quotes_score = quotes.copy()
-    quotes_score['year'] = quotes_score.date.apply(lambda date: date.year)
-    quotes_score = quotes_score.set_index('speaker').join(speakers_pageviews.set_index('speaker'), lsuffix="_left", rsuffix="_right").reset_index()
-    quotes_score = quotes_score[quotes_score.year >= 2015].copy()
-    quotes_score['score'] = quotes_score.apply(scoring, axis = 1)
-    quotes_score = quotes_score.drop(['2015', '2016', '2017', '2018', '2019', '2020', 'year'], axis = 1).reset_index(drop = True)
-    return quotes_score
+    quotes_pageviews = quotes.copy()
+    quotes_pageviews['year'] = quotes_pageviews.date.apply(lambda date: date.year)
+    quotes_pageviews = quotes_pageviews.set_index('speaker').join(speakers_pageviews.set_index('speaker'), lsuffix="_left", rsuffix="_right").reset_index()
+    quotes_pageviews = quotes_pageviews[quotes_pageviews.year >= 2015].copy()
+    quotes_pageviews['pageviews'] = quotes_pageviews.apply(scoring, axis = 1)
+    quotes_pageviews = quotes_pageviews.drop(['2015', '2016', '2017', '2018', '2019', '2020', 'year'], axis = 1).reset_index(drop = True)
+    return quotes_pageviews
 
 # ----------------------------------------------------------------- #
 
 
 def get_score_quotes(quotes, speakers_pageviews):
     quotes_score = get_pageview_quotes(quotes, speakers_pageviews)
-    quotes_score.score = (quotes_score.score - quotes_score.score.min()) / (quotes_score.score.max() - quotes_score.score.min())
+    quotes_score['score'] = (quotes_score.pageviews - quotes_score.pageviews.min()) / (quotes_score.pageviews.max() - quotes_score.pageviews.min())
 
     return quotes_score
 
@@ -413,3 +413,11 @@ def get_pageviews_per_year(page, year):
     return nb_page_views
 
 
+
+# ----------------------------------------------------------------- #
+
+
+def get_sentiment_quotes(quotes):
+    quotes_sentiment = quotes.copy()
+    quotes_sentiment['sentiment'] = quotes_sentiment.quotation.progress_apply(sentiment_binary)
+    return quotes_sentiment
