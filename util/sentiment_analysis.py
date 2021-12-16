@@ -8,16 +8,15 @@ import numpy as np
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
     
     
-#analyzer = SentimentIntensityAnalyzer()
+analyzer = SentimentIntensityAnalyzer()
 
 
-def sentiment_score(quote, analyzer) :
+def sentiment_score(quote) :
     """
     Determine the sentiment of a quote in a corpus.
 
     Args: 
         quote (string): corpus on which we want to determine the sentiment
-        analyzer (SentimentIntensityAnalyzer()): from VADER Sentiment Analysis 
     Return:
         vs (float): the score which is normalized between -1(most extreme negative) and +1 (most extreme positive).
     """   
@@ -25,17 +24,16 @@ def sentiment_score(quote, analyzer) :
     return vs  
 
 
-def sentiment(quote, analyzer) : 
+def sentiment(quote) : 
     """
     Determine the sentiment of a quote in a corpus according to the compound score.
 
     Args:
         quote (string): corpus on which we want to determine the sentiment
-        analyser (SentimentIntensityAnalyzer()): from VADER Sentiment Analysis  
     Return:
         (string): the sentiment of the corpus (positive, negative or neutral).
     """    
-    vs = sentiment_score(quote, analyzer)
+    vs = sentiment_score(quote)
     if (vs >=0.05) :
         return('positive')
     if (vs <= - 0.05) :
@@ -43,17 +41,16 @@ def sentiment(quote, analyzer) :
     else : return('neutral')  
 
 # determine the sentiment of a quote in a corpus (+1, -1 or 0)
-def sentiment_binary(quote, analyzer) : 
+def sentiment_binary(quote) : 
     """
     Determine the sentiment of a quote in a corpus according to the compound score.
 
     Args:
         quote (string): corpus on which we want to determine the sentiment
-        analyser (SentimentIntensityAnalyzer()): from VADER Sentiment Analysis 
     Return: 
         (int): the sentiment of the corpus (+1 for positive, -1 for negative or 0 for neutral). 
     """    
-    vs = sentiment(quote, analyzer)
+    vs = sentiment(quote)
     if (vs == 'positive') :
         return(1)
     if (vs == 'negative') :
