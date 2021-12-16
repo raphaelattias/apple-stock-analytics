@@ -339,4 +339,4 @@ def plot_distrib_val_fame(quotes):
     fig.update_yaxes(title_text="Pageviews", type="log")
     fig.update_layout(title_text= "<b>Distribution of quotes according to its valence and the fame of the speaker</b> <br> <br> FBI–Apple encryption dispute (Feb 2016)",hoverlabel_align = 'left', xaxis_range=[-1.0, 1.0], template="none")
 
-    return fig
+    fig.show()

@@ -11,6 +11,10 @@ import numpy as np
 import pageviewapi 
 from tqdm import tqdm
 from util.sentiment_analysis import *
+import plotly.graph_objects as go
+import plotly.io as pio
+from plotly.subplots import make_subplots
+from plotly.offline import iplot
 
 from util.dataloader import *
 
@@ -421,3 +425,130 @@ def get_sentiment_quotes(quotes):
     quotes_sentiment = quotes.copy()
     quotes_sentiment['sentiment'] = quotes_sentiment.quotation.progress_apply(sentiment_binary)
     return quotes_sentiment
+
+
+# ----------------------------------------------------------------- #
+
+def pos_score(row):
+    score = 0
+    if row.sentiment > 0:
+        score = row.score
+    return score
+
+# ----------------------------------------------------------------- #
+
+def neg_score(row):
+    score = 0
+    if row.sentiment < 0:
+        score = -row.score
+    return score
+
+
+# ----------------------------------------------------------------- #
+
+
+def get_neg_pos_score_quotes(quotes):
+    quotes_pos_neg_score = quotes.copy()
+    quotes_pos_neg_score['positive_score'] = quotes_pos_neg_score.apply(pos_score, axis = 1)
+    quotes_pos_neg_score['negative_score'] = quotes_pos_neg_score.apply(neg_score, axis = 1)
+    return quotes_pos_neg_score
+
+
+# ----------------------------------------------------------------- #
+
+
+def get_score_date(quotes):
+    score_date = quotes.copy()
+    score_date = score_date[['date', 'positive_score', 'negative_score']].dropna().groupby(['date']).sum()
+    score_date = score_date.reset_index(drop = False)
+    score_date = score_date.sort_values(by="date")
+    score_date = pd.DataFrame(score_date.groupby(score_date.date.dt.date).sum())
+    score_date = score_date.reset_index(drop = False)
+    return score_date
+
+
+def stock_price_against_quotes_score(score_date, stock_all):
+    stock_analysis = stock_all.copy()
+
+    date_min = '2015-01-01'
+    stock_analysis = stock_analysis[stock_analysis.Date >= date_min]
+
+    date_max = '2020-04-16'
+    stock_analysis = stock_analysis[stock_analysis.Date <= date_max]
+
+    stock_analysis['stock_price'] = (stock_analysis.Open + stock_analysis.Low) / 2
+    
+
+
+    trace1 = go.Scatter(
+        x = score_date.date,
+        y = score_date.positive_score,
+        mode = 'lines',
+        name = 'Positive',
+        marker=dict(color='rgb(30,50,130)')
+    )
+
+    trace2 = go.Scatter(
+        x = score_date.date,
+        y = score_date.negative_score,
+        mode = 'lines',
+        name = 'Negative',
+        marker=dict(color='rgb(150,37,30)')
+    )
+
+    trace3 = go.Scatter(
+        x = stock_analysis.Date,
+        y = stock_analysis.stock_price,
+        mode = 'lines',
+        name = 'Stock',
+        # marker=dict(color='rgb(250,125,62)'),
+        marker=dict(color='rgb(25,125,35)'),
+        opacity = 0.4
+    )
+
+    pio.renderers.default = "notebook_connected"
+    fig = make_subplots(specs=[[{"secondary_y": True}]])
+    fig.add_trace(trace3, secondary_y=True)
+    fig.add_trace(trace1)
+    fig.add_trace(trace2)
+    fig['layout'].update(height = 600, 
+                            width = 800, 
+                            title = 'Distribution of the positive and negative')
+    fig.update_traces(marker_line_width = 0,
+                    selector=dict(type="bar"))
+
+    max_quotes = max(-score_date.negative_score.min(), score_date.positive_score.max())
+    y_max_quotes = max_quotes + (max(-score_date.negative_score.min(), score_date.positive_score.max())/10)
+    y_min_quotes = -max_quotes + (max(-score_date.negative_score.min(), score_date.positive_score.max())/10)
+
+    max_stock = max(-stock_analysis.stock_price.min(), stock_analysis.stock_price.max()) + (max(-stock_analysis.stock_price.min(), stock_analysis.stock_price.max()) / 10)
+    y_max_stock = max_stock + (max(-stock_analysis.stock_price.min(), stock_analysis.stock_price.max()) / 10)
+    y_min_stock = -max_stock + (max(-stock_analysis.stock_price.min(), stock_analysis.stock_price.max()) / 10)
+
+    fig.update_xaxes(title_text = 'Date')
+    fig.update_yaxes(range=[y_min_quotes, y_max_quotes], 
+                        secondary_y=False, 
+                        title_text = 'Score'
+    )
+    fig.update_yaxes(range=[y_min_stock, 
+                        y_max_stock], 
+                        secondary_y=True,
+                        title_text = 'Stock price [$]'
+    )
+
+    fig.update_xaxes(
+        rangeslider_visible=True,
+        rangeselector=dict(
+            buttons=list([
+                dict(count=1, label="1m", step="month", stepmode="backward"),
+                dict(count=6, label="6m", step="month", stepmode="backward"),
+                dict(count=1, label="1y", step="year", stepmode="backward"),
+                dict(step="all")
+            ])
+        )
+    )
+
+    fig.update_layout(bargap=0.1, bargroupgap = 0, template='ggplot2', )
+    iplot(fig)
+
+    fig.write_html('figures/stock_price_against_quotes_score.html')
