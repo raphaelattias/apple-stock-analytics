@@ -138,28 +138,28 @@ def fig_all_sentiments(quotes,stock):
     fig.add_trace(
         go.Bar(x=all_quotes_per_day.Date,
                 y=all_quotes_per_day.All,
-                name="All",
+                name="All quotes",
                 marker_color='rgb(50,50,50)', opacity = 0.5,))
     fig['data'][0]['showlegend'] = True
-    fig['data'][0]['name']='All'
+    fig['data'][0]['name']='All quotes'
     fig.add_trace(
         go.Bar(x=all_quotes_per_day.Date,
                 y=all_quotes_per_day.Negative,
-                name="Negative",
+                name="Negative quotes",
                 visible=False,
                 marker_color='rgb(165,37,30)'))
 
     fig.add_trace(
         go.Bar(x=all_quotes_per_day.Date,
                 y=all_quotes_per_day.Positive,
-                name="Positive",
+                name="Positive quotes",
                 visible = False,
                 marker_color='rgb(50,120,70)'))
 
     fig.add_trace(
         go.Bar(x=all_quotes_per_day.Date,
                 y=all_quotes_per_day.Neutral,
-                name="Neutral",
+                name="Neutral quotes",
                 visible=False,
                 marker_color='rgb(50,90,200)'))
 
@@ -175,26 +175,26 @@ def fig_all_sentiments(quotes,stock):
                     dict(label="All quotes",
                         method="update",
                         args=[{"visible": [True, False, False, False]},
-                            {"title": "All"}]),
+                            {"title": "<b>Distribution of all quotes (cumulative positive and negative) along the years </b>"}]),
                     dict(label="Negative",
                         method="update",
                         args=[{"visible": [True, True, False, False]},
-                            {"title": "Negative quotes"}]),
+                            {"title": "<b>Distribution of the quotes along the years </b> <br> <br> All quotes against the negative ones"}]),
                     dict(label="Positive",
                         method="update",
                         args=[{"visible": [True, False, True, False]},
-                            {"title": "Positive quotes"}]),
+                            {"title": "<b>Distribution of the quotes along the years </b> <br> <br> All quotes against the positive ones"}]),
                     dict(label="Neutral",
                         method="update",
                         args=[{"visible": [True, False, False, True]},
-                            {"title": "Neutral quotes"}]),
+                            {"title": "<b>Distribution of the quotes along the years </b> <br> <br> All quotes against the neutral ones"}]),
                 ]),
             )
         ])
 
     # Set title
     fig.update_layout(
-        title_text="All quotes",
+        title_text="<b>Distribution of all quotes (cumulative positive and negative) along the years </b>",
         xaxis_domain=[0.05, 1.0],
         yaxis_range =[0,ymax],
         xaxis_title_text='Date', # xaxis label
@@ -238,14 +238,14 @@ def fig_all_sentiments(quotes,stock):
     fig.add_trace(
         go.Bar(x=all_quotes_per_day.Date,
                 y=all_quotes_per_day.Negative,
-                name="Negative",
-                    visible=True,
+                name="Negative quotes",
+                visible=True,
                 marker_color='rgb(165,37,30)'))
 
     fig.add_trace(
         go.Bar(x=all_quotes_per_day.Date,
                 y=all_quotes_per_day.Positive,
-                name="Positive",
+                name="Positive quotes",
                 visible = False,
                 marker_color='rgb(50,120,70)'))
 
@@ -269,18 +269,18 @@ def fig_all_sentiments(quotes,stock):
                     dict(label="Negative",
                         method="update",
                         args=[{"visible": [ True, False, True]},
-                            {"title": "Negative quotes"}]),
+                            {"title": "Distribution of the negative quotes against the Apple stock price along the years"}]),
                     dict(label="Positive",
                         method="update",
                         args=[{"visible": [False, True, True]},
-                            {"title": "Positive quotes"}])
+                            {"title": "Distribution of the positive quotes against the Apple stock price along the years"}])
                 ]),
             )
         ])
 
     # Set title
     fig.update_layout(
-        title_text="Negative Quotes",
+        title_text="Distribution of the negative quotes against the Apple stock price along the years",
         xaxis_domain=[0.05, 1.0],
         yaxis_range =[0,ymax],
         xaxis_title_text='Date', # xaxis label
@@ -291,8 +291,8 @@ def fig_all_sentiments(quotes,stock):
 
     )
 
-    fig.update_yaxes( secondary_y=False, range=[0,1100])
-    fig.update_yaxes( secondary_y=True, range=[0,90])
+    fig.update_yaxes( secondary_y=False, range=[0,1100], title_text = 'Frequency of quotes')
+    fig.update_yaxes( secondary_y=True, range=[0,90], title_text = 'Stock price [$]')
 
     fig.update_traces(marker_line_width = 0,  selector=dict(type="bar"))
 

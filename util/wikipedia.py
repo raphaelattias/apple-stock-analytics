@@ -1,50 +1,61 @@
-# This fil contains all the function we will use in the process of
-# the wikipedia data set.
-
-# ----------------------------------------------------------------- #
-
-
 # Import all the libraries
 import os
 import pandas as pd
 import numpy as np
 import pageviewapi 
 from tqdm import tqdm
-from util.sentiment_analysis import *
 import plotly.graph_objects as go
 import plotly.io as pio
 from plotly.subplots import make_subplots
 from plotly.offline import iplot
 
+# Import functions from python files
+from util.sentiment_analysis import *
 from util.dataloader import *
 
+
+# For having tqdm progress bar when we use apply function
 tqdm.pandas()
+
 
 # ----------------------------------------------------------------- #
 
 
-# This function is use to transform all the qids in the datafram to 
-# a string fromat.
 def pandas_process(input):
+    """
+        This function is used to transform all the qids in the 
+        dataframe to a string format
+
+    Args:
+        input [any other format]: Just an object we want to transform 
+        into a string (in our case it will be the QID)
+
+    Returns:
+        [string]: The input ttranformed into a string.
+    """
+
+    # Transfrom into a string
     output = str(input)
+
+    # Return the output
     return output
 
 
 # ----------------------------------------------------------------- #
 
-# This function is here to get all the ID of the different speakers in 
-# the wiki data set. The idea is to have list of all the person that
-# have spoken in Quotebank da  ta set and keep only the wikipedia 
-# information we want. 
+
 def get_speakers_ids(quotes):
     """
-
+        This function is here to get all the ID of the different speakers in 
+        the wiki data set. The idea is to have list of all the person that
+        have spoken in Quotebank da  ta set and keep only the wikipedia 
+        information we want. 
 
     Args:
-        quotes (pd.Dataframe): 
+        quotes [pd.Dataframe]: Data frame that contain all teh quotes
 
     Returns:
-        (pd.Dataframe): 
+        [pd.Dataframe]: 
     """
 
     # Copy the data frame
