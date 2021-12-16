@@ -2,11 +2,16 @@ import numpy as np
 import matplotlib.pyplot as plt
 from wordcloud import WordCloud, STOPWORDS, ImageColorGenerator
 from PIL import Image
+from sentiment_analysis import *
 
 import plotly.graph_objs as go
 alpha_ = 0.7
 figsize = [10.0, 6.0]
 DPI = 250
+
+
+# ----------------------------------------------------------------- #
+
 
 def bar_plots_quotes(frequency_all, frequency_apple, years):
     barwidth = 0.3
@@ -36,6 +41,10 @@ def bar_plots_quotes(frequency_all, frequency_apple, years):
 
     return 0
 
+
+# ----------------------------------------------------------------- #
+
+
 def plot_pie_numquote(quote_df, year, head_ = 5):
     ax = plt.subplots(figsize=(6, 3), subplot_kw=dict(aspect="equal"))
     ax = quote_df.groupby("speaker")["quotation"].count().sort_values(ascending = False).drop(["none"]).head(head_).plot.pie()
@@ -48,6 +57,9 @@ def plot_pie_numquote(quote_df, year, head_ = 5):
     plt.show()
 
 
+# ----------------------------------------------------------------- #
+
+
 def plot_quotes_per_day(quote_df, year):
     quote_df.groupby("date")["quotation"].count().plot(alpha = alpha_)
     plt.title('Numbers of quotes per day in %i' %year)
@@ -58,6 +70,10 @@ def plot_quotes_per_day(quote_df, year):
 
     plt.show()
 
+
+# ----------------------------------------------------------------- #
+
+
 def plot_numOcc_per_day(quote_df, year):
     quote_df.groupby("date").sum().plot(alpha = alpha_)
     plt.title('Numbers of occurrences of all the quotes per day in %i' %year)
@@ -67,6 +83,9 @@ def plot_numOcc_per_day(quote_df, year):
     plt.rcParams['figure.dpi'] = DPI
 
     plt.show()
+
+
+# ----------------------------------------------------------------- #
 
     
 def plot_wordcloud(text): 
@@ -109,6 +128,9 @@ def plot_wordcloud(text):
 
 
     #plot_wordcloud(' '.join(quotes[quotes.speaker == "steve jobs"].quotation).split(" "))
+
+
+# ----------------------------------------------------------------- #
 
 
 def plotly_wordcloud(text):
@@ -161,3 +183,155 @@ def plotly_wordcloud(text):
     fig = go.Figure(data=[trace], layout=layout)
     
     return fig 
+
+
+# ----------------------------------------------------------------- #
+
+
+def split_quote(quote):
+    new_quote = quote
+    quote_cut = str()
+    words = quote.quotation.split()
+    i=1
+    for word in words:
+        if (i % 10 == 0):
+            quote_cut += '<br>'
+        quote_cut += word + ' '
+        i += 1
+    new_quote.quotation = quote_cut
+    return new_quote
+
+
+# ----------------------------------------------------------------- #
+
+
+def plot_distrib_val_fame(quotes):
+
+    quotes_df = quotes.copy()
+
+    quotes_df.apply(split_quote, axis =1)
+    quotes_df.sentiment = quotes_df.quotation.apply(sentiment_score)
+
+    #
+    quotes_FBI = quotes_df[quotes_df.date >= '2016-02-19' ]
+    quotes_FBI = quotes_FBI[quotes_FBI.date <= '2016-02-21']
+
+    quotes_iPhone_X = quotes_df[quotes_df.date >= '2017-09-11']
+    quotes_iPhone_X = quotes_iPhone_X[quotes_iPhone_X.date <= '2017-09-13']
+
+    quotes_record_Q1 = quotes_df[quotes_df.date >= '2020-01-29'] 
+    quotes_record_Q1 = quotes_record_Q1[quotes_record_Q1.date <= '2020-01-31']
+
+    quotes_trillion = quotes_df[quotes_df.date >= '2018-08-01']
+    quotes_trillion = quotes_trillion[quotes_trillion.date <= '2018-08-03']
+
+    quotes_designer_leave = quotes_df[quotes_df.date >= '2019-06-26']
+    quotes_designer_leave = quotes_designer_leave[quotes_designer_leave.date <= '2019-06-28']
+
+    quotes_event_iPhone7 = quotes_df[quotes_df.date >= '2016-09-07']
+    quotes_event_iPhone7 = quotes_event_iPhone7[quotes_event_iPhone7.date <= '2016-09-09']
+
+    fig = go.Figure()
+    fig.add_trace(
+        go.Scatter(x=quotes_FBI.sentiment,
+                y=quotes_FBI.pageviews,
+                mode = 'markers',
+                marker=dict(color=quotes_FBI.sentiment, colorscale='Bluered_r'),
+                hovertext= "Speaker : " + quotes_FBI.label + '<br>' + "Quotation : " + quotes_FBI.quotation,
+                name="FBI conflict")
+        )
+
+    fig.add_trace(
+        go.Scatter(x=quotes_iPhone_X.sentiment,
+                y=quotes_iPhone_X.pageviews,
+                mode = 'markers',
+                marker=dict(color=quotes_iPhone_X.sentiment, colorscale='Bluered_r'),
+                hovertext= "Speaker : " + quotes_iPhone_X.label + '<br>' + "Quotation : " + quotes_iPhone_X.quotation,
+                visible=False,
+                name="iPhone X")
+        )
+
+    fig.add_trace(
+        go.Scatter(x=quotes_record_Q1.sentiment,
+                y=quotes_record_Q1.pageviews,
+                mode = 'markers',
+                marker=dict(color=quotes_record_Q1.sentiment, colorscale='Bluered_r'),
+                hovertext= "Speaker : " + quotes_record_Q1.label + '<br>' + "Quotation : " + quotes_record_Q1.quotation,
+                visible=False,
+                name="Record Q1 earnings")
+        )
+
+    fig.add_trace(
+        go.Scatter(x=quotes_trillion.sentiment,
+                y=quotes_trillion.pageviews,
+                mode = 'markers',
+                marker=dict(color=quotes_trillion.sentiment, colorscale='Bluered_r'),
+                hovertext= "Speaker : " + quotes_trillion.label + '<br>' + "Quotation : " + quotes_trillion.quotation,
+                visible=False,
+                name="Apple reach 1 trillions")
+        )
+
+    fig.add_trace(
+        go.Scatter(x=quotes_designer_leave.sentiment,
+                y=quotes_designer_leave.pageviews,
+                mode = 'markers',
+                marker=dict(color=quotes_designer_leave.sentiment, colorscale='Bluered_r'),
+                hovertext= "Speaker : " + quotes_designer_leave.label + '<br>' + "Quotation : " + quotes_designer_leave.quotation,
+                visible=False,
+                name="Jony Ive leaves")
+        )
+
+    fig.add_trace(
+        go.Scatter(x=quotes_event_iPhone7.sentiment,
+                y=quotes_event_iPhone7.pageviews,
+                mode = 'markers',
+                marker=dict(color=quotes_event_iPhone7.sentiment, colorscale='Bluered_r'),
+                hovertext= "Speaker : " + quotes_event_iPhone7.label + '<br>' + "Quotation : " + quotes_event_iPhone7.quotation,
+                visible=False,
+                name="iPhone 7")
+        )
+
+    fig.update_layout(
+            updatemenus=[
+                dict(
+                    type="buttons",
+                    direction="right",
+                    active=0,
+                    x=0.93,
+                    y=-0.25,
+                    buttons=list([
+                        dict(label="19-21 Feb 2016",
+                            method="update",
+                            args=[{"visible": [True, False, False, False, False, False]},
+                                {"title": "<b>Distribution of quotes according to its valence and the fame of the speaker</b> <br> <br> FBI–Apple encryption dispute (Feb 2016)"}]),
+                        dict(label="07-09 Sep 2016",
+                            method="update",
+                            args=[{"visible": [False, False, False, False, False, True]},
+                                {"title": "<b>Distribution of quotes according to its valence and the fame of the speaker</b> <br> <br> Event for the presentation of iPhone 7 (Sep 2016)"}]),
+                        dict(label="11-13 Sep 2017",
+                            method="update",
+                            args=[{"visible": [False, True, False, False, False, False]},
+                                {"title": "<b>Distribution of quotes according to its valence and the fame of the speaker</b> <br> <br> Release of the iPhone X (Sep 2017)"}]),
+                        dict(label="01-03 Aug 2018",
+                            method="update",
+                            args=[{"visible": [False, False, False, True, False, False]},
+                                {"title": "<b>Distribution of quotes according to its valence and the fame of the speaker</b> <br> <br> Apple reach $1 trillion in market capitalization (Aug 2018)"}]),
+                        dict(label="26-28 Jun 2019",
+                            method="update",
+                            args=[{"visible": [False, False, False, False, True, False]},
+                                {"title": "<b>Distribution of quotes according to its valence and the fame of the speaker</b> <br> <br> Chief Apple designer, Jony Ive, leaves the company (Jun 2019)"}]),
+                        dict(label="29-31 Jan 2020",
+                            method="update",
+                            args=[{"visible": [False, False, True, False, False, False]},
+                                {"title": "<b>Distribution of quotes according to its valence and the fame of the speaker</b> <br> <br> Record in first quarter results for Apple (Jan 2020)"}])
+                    ]),
+                )
+            ])
+
+
+    # 
+    fig.update_xaxes(title_text="Sentiment")
+    fig.update_yaxes(title_text="Pageviews", type="log")
+    fig.update_layout(title_text= "<b>Distribution of quotes according to its valence and the fame of the speaker</b> <br> <br> FBI–Apple encryption dispute (Feb 2016)",hoverlabel_align = 'left', xaxis_range=[-1.0, 1.0], template="none")
+
+    return fig
