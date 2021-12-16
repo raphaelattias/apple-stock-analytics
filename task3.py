@@ -23,7 +23,7 @@ import numpy as np
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
 def predict_sentiment(quotes):
-    new_quotes = quotes.copt()
+    new_quotes = quotes.copy()
     new_quotes.rename({'quotation': 'Quotation'}, axis = 1, inplace=True)
     
     analyzer = SentimentIntensityAnalyzer()
@@ -50,7 +50,7 @@ def predict_sentiment(quotes):
     return new_quotes
 
 def correlation_stock_sentiment(quotes,stock):
-        # separate the positive and negative quotes
+    # separate the positive and negative quotes
     pos_quotes = quotes[quotes['sentiment'] == 'positive']
     neg_quotes = quotes[quotes['sentiment'] == 'negative']
     neut_quotes = quotes[quotes['sentiment'] == 'neutral']
@@ -139,7 +139,7 @@ def fig_all_sentiments(quotes,stock):
         go.Bar(x=all_quotes_per_day.Date,
                 y=all_quotes_per_day.All,
                 name="All",
-                marker_color='rgb(30,50,130)', opacity = 0.5,))
+                marker_color='rgb(50,50,50)', opacity = 0.5,))
     fig['data'][0]['showlegend'] = True
     fig['data'][0]['name']='All'
     fig.add_trace(
@@ -230,10 +230,8 @@ def fig_all_sentiments(quotes,stock):
     #all_quotes_per_day.Positive=(all_quotes_per_day.Positive-all_quotes_per_day.Positive.mean())/all_quotes_per_day.Positive.std()
     #all_quotes_per_day.Negative=(all_quotes_per_day.Negative-all_quotes_per_day.Negative.mean())/all_quotes_per_day.Negative.std()
 
-    ma = px.scatter(x=stock['Date'], y=stock['Open'],trendline="rolling", trendline_options=dict(window=25)).data[1]['y']
-
     fig = make_subplots(specs=[[{"secondary_y": True}]])
-    ymax = max(all_quotes_per_day.Positive.max(),all_quotes_per_day.Negative.max())
+    ymax = max(all_quotes_per_day.Positive.max(), all_quotes_per_day.Negative.max())
 
     # Add Traces
 
@@ -251,7 +249,12 @@ def fig_all_sentiments(quotes,stock):
                 visible = False,
                 marker_color='rgb(50,120,70)'))
 
-    fig.add_trace(go.Scatter(x=stock['Date'], y=(stock['Open']).interpolate(method="polynomial",order=5), name = f"{stock_name} stock price", visible=True, marker_color='blue'),secondary_y=True)
+    fig.add_trace(go.Scatter(x=stock['Date'], 
+                            y=(stock['Open']).interpolate(method="polynomial",
+                            order=5), name = f"{stock_name} stock price", 
+                            visible=True, 
+                            marker_color='rgb(30,50,155)'),
+                            secondary_y=True)
 
 
     fig.update_layout(
@@ -305,3 +308,4 @@ def fig_all_sentiments(quotes,stock):
     )
 )
     fig.show()
+    fig.write_html("figures/neg_pos_market.html")
