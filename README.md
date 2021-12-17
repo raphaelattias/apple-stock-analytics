@@ -1,6 +1,6 @@
 # What is the role of the media coverage in explaining stock market fluctuations?
 
-The full data story can be found here: [www.thepandariders.com](https://thepandariders.com/). Enjoy!
+The full data story can be found here: [www.thepandariders.com](https://thepandariders.com/). For the best experience we would recommend you to use Google Chrome and avoid Safari. Enjoy!
 
 ### Abstract and research questions
 <img align="right" width="300" height="300" src="figures/wordcloud_apple.png">
