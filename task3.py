@@ -76,19 +76,19 @@ def correlation_stock_sentiment(quotes,stock):
     pos_per_day['Date']= pd.to_datetime(pos_per_day['Date'], errors='coerce')
     stock_to_keep = stock[stock.Date.isin(set(stock.Date).intersection(set(pos_per_day.Date)))]
     pos_per_day_to_keep = pos_per_day[pos_per_day.Date.isin(set(stock.Date).intersection(set(pos_per_day.Date)))]
-    print("Pearson pos", pearsonr(stock_to_keep.Liquidity,pos_per_day_to_keep.sentiment))
+    print("Pearson positive", pearsonr(stock_to_keep.Liquidity,pos_per_day_to_keep.sentiment))
     
     neg_per_day.rename({'date': 'Date'}, axis=1, inplace=True)
     neg_per_day['Date']= pd.to_datetime(neg_per_day['Date'], errors='coerce')
     stock_to_keep = stock[stock.Date.isin(set(stock.Date).intersection(set(neg_per_day.Date)))]
     neg_per_day_to_keep = neg_per_day[neg_per_day.Date.isin(set(stock.Date).intersection(set(neg_per_day.Date)))]
-    print("Pearson neg", pearsonr(stock_to_keep.Liquidity,neg_per_day_to_keep.sentiment))
+    print("Pearson negative", pearsonr(stock_to_keep.Liquidity,neg_per_day_to_keep.sentiment))
 
     neut_per_day.rename({'date': 'Date'}, axis=1, inplace=True)
     neut_per_day['Date']= pd.to_datetime(neut_per_day['Date'], errors='coerce')
     stock_to_keep = stock[stock.Date.isin(set(stock.Date).intersection(set(neut_per_day.Date)))]
     neut_per_day_to_keep = neut_per_day[neut_per_day.Date.isin(set(stock.Date).intersection(set(neut_per_day.Date)))]
-    print("Pearson neut", pearsonr(stock_to_keep.Liquidity,neut_per_day_to_keep.sentiment))
+    print("Pearson neutral", pearsonr(stock_to_keep.Liquidity,neut_per_day_to_keep.sentiment))
 
 def fig_all_sentiments(quotes,stock):
     stock_name = "AAPL"
