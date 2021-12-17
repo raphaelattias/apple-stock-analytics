@@ -89,7 +89,7 @@ def weekly_liquidity(stock, quantile=0.98):
                       template='ggplot2',
                       yaxis_title="Liquidity [$]"
                   )
-  fig.show()
+  fig.show("svg")
   fig.write_html("figures/liquidity.html")
 
 def daily_stock_price(stock, quantile=0.98):
@@ -127,7 +127,7 @@ def daily_stock_price(stock, quantile=0.98):
                   template='ggplot2',
                   yaxis_title='Stock price [$]'
                   )
-  fig.show()
+  fig.show("svg")
   fig.write_html("figures/stock_price.html")
 
 def daily_quotes(quotes, quantile = 0.98):
@@ -173,7 +173,7 @@ def daily_quotes(quotes, quantile = 0.98):
                   template = 'ggplot2',
                   yaxis_title="Quotations count"
                   )
-  fig.show()
+  fig.show("svg")
   fig.write_html("figures/daily_quotes.html")
 
 
@@ -241,7 +241,7 @@ def seasonal_analysis(df, column="Liquidity"):
   fig['layout']['yaxis1']['title']=f'{column} [$]'
   fig['layout']['yaxis3']['title']=f'{column} [$]'
 
-  fig.show()
+  fig.show("svg")
   fig.write_html("figures/seasonal_analysis.html")
 
 def stock_price_with_quotes(stock, quotes, quantile = 0.98):
@@ -304,7 +304,7 @@ def stock_price_with_quotes(stock, quotes, quantile = 0.98):
       )
   )
   # IPython notebook
-  fig.show()
+  fig.show("svg")
   fig.write_html("figures/daily_quotes_related_Apple_stock.html")
 
 def pearson_stock_quotes(stock,quotes):

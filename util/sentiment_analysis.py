@@ -277,7 +277,7 @@ def fig_all_sentiments(quotes,stock):
             ])
         )
     )
-    fig.show()
+    fig.show("svg")
     fig.write_html("figures/all_quotes_sentiment.html")
 
 
@@ -364,5 +364,5 @@ def fig_all_sentiments(quotes,stock):
         ])
     )
     )
-    fig.show()
+    fig.show("svg")
     fig.write_html("figures/neg_pos_market.html")

@@ -828,7 +828,7 @@ def get_score_date(quotes):
 # ----------------------------------------------------------------- #
 
 
-def correlation_stock_sentiment(score_date, stock):
+def correlation_stock_fame(score_date, stock):
     """
     This function computes the correlation coefficients for negative 
     and positive score against stock liquidity.

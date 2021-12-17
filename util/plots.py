@@ -434,8 +434,9 @@ def plot_distrib_val_fame(quotes):
     fig.update_xaxes(title_text="Sentiment")
     fig.update_yaxes(title_text="Pageviews", type="log")
     fig.update_layout(title_text= "<b>Distribution of quotes according to its valence and the fame of the speaker</b> <br> <br> FBI–Apple encryption dispute (Feb 2016)", title_y=0.95, hoverlabel_align = 'left', xaxis_range=[-1.0, 1.0], template="none")
+    fig.update_layout( autosize=False, width=1200, height=700,)
 
-    fig.show()
+    fig.show("svg")
     
     # Save the plot in html
     fig.write_html("figures/distribution_valence_fame.html")
@@ -535,6 +536,6 @@ def stock_price_against_quotes_score(score_date, stock_all):
     )
 
     fig.update_layout(bargap=0.1, bargroupgap = 0, template='ggplot2', )
-    iplot(fig)
+    fig.show('svg')
 
     fig.write_html('figures/stock_price_against_quotes_score.html')

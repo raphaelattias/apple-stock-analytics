@@ -78,7 +78,7 @@ def fig_world():
   fig.update(frames=frames)
   fig.write_html('figures/world_map_apple_stores.html')
   print(f'Map of apples stores saved in figures/world_map_apple_stores.html')
-  fig.show()
+  fig.show("svg")
 
 
 def find_stores():
