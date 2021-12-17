@@ -321,7 +321,7 @@ def fig_all_sentiments(quotes,stock):
                 direction="right",
                 active=0,
                 x=1,
-                y=1.15,
+                y=1.13,
                 buttons=list([
                     dict(label="Negative",
                         method="update",
@@ -338,7 +338,6 @@ def fig_all_sentiments(quotes,stock):
     # Set title
     fig.update_layout(
         title_text="Distribution of the negative quotes against the Apple stock price along the years",
-        title_y=1,
         xaxis_domain=[0.05, 1.0],
         yaxis_range =[0,ymax],
         xaxis_title_text='Date', # xaxis label
@@ -364,6 +363,6 @@ def fig_all_sentiments(quotes,stock):
             dict(step="all")
         ])
     )
-)
+    )
     fig.show()
     fig.write_html("figures/neg_pos_market.html")

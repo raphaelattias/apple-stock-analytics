@@ -1,8 +1,9 @@
 # What is the role of the media coverage in explaining stock market fluctuations?
 
-The full data story can be found [here](https://thepandariders.com/). Enjoy!
+The full data story can be found here: [www.thepandariders.com](https://thepandariders.com/). Enjoy!
 
 ### Abstract and research questions
+<img align="right" width="300" height="300" src="figures/wordcloud_apple.png">
 
 Apple has been a market leader in the world of technology ever since the launch of its first product. Furthermore, media are more and more being used to study their impact on stock market movements. In this project, we aim to show that the rises and falls in stock prices of Apple correlate to the extent that people are talking about Apple in the media, the way people are talking about the company, and the fame of the speakers. Firstly, we will wonder what is the role of the media coverage in explaining stock market fluctuations? Then, we will examine what is the influence of the people's opinions about Apple expressed in the media on the stock market? Eventually, we will add a last level of complexity and we will ask who are the individuals who have influence over potential customers, and do these notorious influencers have an impact on the company image and eventually, on the stock market?
 
@@ -11,6 +12,17 @@ Apple has been a market leader in the world of technology ever since the launch 
 * `Quotebank DataSet` : To investigate the reciprocal relationships between the fluctuations of the Apple stock market and media coverage related to this company, we study mentions of Apple using time series analysis. We filter out any quotes that are not related to the company, the products or its direction board. The filtered dataset is then saved as a pickle file containing approximately 300.000 quotes out of the original 234 millions. This new dataset provides a great preview of Apple mentions in the media. We will then analyse to what extent Apple is mentioned according to time in the media, who are the speakers talking about this company and the way they are talking about it.
 * `Wikipedia API` : We use the Wikipedia API to recover informations about the speakers. We will classify them as having a significant influence or a low influence over potential customers based on the Wikipedia page view statistics per year. The idea is to get all the Wiki qids speakers that have have spoken in our filtered quotes dataset. Then, with the Wikipedia API, we would get all the needed informations about the speakers.
 * `Yahoo Finance API` : Eventually, we use the Yahoo Finance API to recover informations about the stock markets. This API provides quick and easy access to finance metrics for any stock or index. Among the many financial metrics available we decided to focus on the daily stock price and volume. The former will be an indicator of the long term health of the stock, and the latter of the daily volatility it may experience. In this milestone we compare the Apple stock ($AAPL) to the S&P500 ($SPY) from 2008 until 2020, which is is a stock market index tracking the performance of 500 large companies listed on stock exchanges in the US. We have chosen this equity index as it is one of the most tracked indices and generally an indicator of the overall health of the US stock market.
+
+***
+### Installation requirements
+A conda environment can be easily created using the library requirements provided in the root of the project:
+```
+conda env create -f environment.yml
+```
+Most notably, we used:
+* `pandas=1.3.3` for the data pipeline.
+* `prophet==1.0.1` for time series forecasting.
+* `plotly=5.4.0` for data visualization.
 
 ***
 ### Methods :

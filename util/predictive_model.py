@@ -3,6 +3,7 @@ import pandas as pd
 from prophet.diagnostics import cross_validation
 from prophet.diagnostics import performance_metrics
 from sklearn.model_selection import TimeSeriesSplit
+from prophet.plot import plot_plotly
 import itertools
 import pandas as pd
 from tqdm.notebook import tqdm
@@ -49,10 +50,11 @@ def times_series_predict(stock, quotes_sentiment = None, features = None, respon
   tscv = TimeSeriesSplit()
   figs = []
   prediction_frame = build_prediction_frame(stock,quotes_sentiment)
+  stock_ = stock[stock.Date.dt.year >= 2015]
 
-  for train_index, test_index in tscv.split(prediction_frame):
+  for train_index, _ in tscv.split(prediction_frame):
     m = Prophet(changepoint_prior_scale=1.0,seasonality_prior_scale=0.021544)
-    prediction_frame_shorter = build_prediction_frame(stock.iloc[train_index],quotes_sentiment)
+    prediction_frame_shorter = build_prediction_frame(stock_.iloc[train_index],quotes_sentiment)
     m = fit_prophet(m, prediction_frame_shorter, features=features)
     pred = predict_future(m,prediction_frame,feature_frame=quotes_sentiment)
     fig = plot_plotly(m,pred)
