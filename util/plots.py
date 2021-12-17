@@ -181,19 +181,19 @@ def plot_wordcloud(text, path = 'figures/wordcloud.png', mask = False):
 
         comment_words += " ".join(tokens)+" "
 
-    mask = np.array(Image.open("figures/apple_logo_black.png"))
 
     if mask:
-        wordcloud = WordCloud(height=2000, width=1000, mode = "RGBA", mask = mask,
+        mask = np.array(Image.open("figures/apple_logo_black.png"))
+        wordcloud = WordCloud(height=2000, width=2000, mode = "RGBA", mask = mask,
                 background_color = "White",
-                stopwords = stopwords, colormap="copper").generate(comment_words)
+                stopwords = stopwords, colormap="gist_gray_r").generate(comment_words)
     else:
         wordcloud = WordCloud(height=2000, width=1000, mode = "RGBA",
                         background_color = "White",
                         stopwords = stopwords, colormap="copper").generate(comment_words)
 
     # plot the WordCloud image                      
-    plt.figure(figsize = (8,16), facecolor = None)
+    plt.figure(figsize = (8,8), facecolor = None)
     plt.imshow(wordcloud)
     plt.axis("off")
     plt.tight_layout(pad = 0)
