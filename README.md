@@ -14,7 +14,7 @@ Apple has been a market leader in the world of technology ever since the launch 
 
 ***
 ### Installation requirements
-<img style="float: right;" height=100px width=100px src="figures/wordcloud_apple.png">
+<img align="right" width="100" height="100" src="figures/wordcloud_apple.png">
 A conda environment can be easily created using the library requirements provided in the root of the project:
 ```
 conda env create -f environment.yml
