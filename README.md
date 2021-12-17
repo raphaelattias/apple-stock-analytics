@@ -18,6 +18,10 @@ A conda environment can be easily created using the library requirements provide
 ```
 conda env create -f environment.yml
 ```
+Most notably, we used:
+* `pandas=1.3.3` for the data pipeline.
+* `prophet==1.0.1` for time series forecasting.
+* `plotly=5.4.0` for data visualization.
 
 ***
 ### Methods :
