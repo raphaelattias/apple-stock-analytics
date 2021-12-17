@@ -2,8 +2,6 @@
 
 The full data story can be found [here](https://thepandariders.com/). Enjoy!
 
-![Wordcloud](/figures/wordcloud.png)
-
 ### Abstract and research questions
 
 Apple has been a market leader in the world of technology ever since the launch of its first product. Furthermore, media are more and more being used to study their impact on stock market movements. In this project, we aim to show that the rises and falls in stock prices of Apple correlate to the extent that people are talking about Apple in the media, the way people are talking about the company, and the fame of the speakers. Firstly, we will wonder what is the role of the media coverage in explaining stock market fluctuations? Then, we will examine what is the influence of the people's opinions about Apple expressed in the media on the stock market? Eventually, we will add a last level of complexity and we will ask who are the individuals who have influence over potential customers, and do these notorious influencers have an impact on the company image and eventually, on the stock market?
@@ -28,9 +26,9 @@ Apple has been a market leader in the world of technology ever since the launch 
 ***
 ### Organization within the team : 
 * [@Bapitou](https://github.com/Bapitou) : Quotebank EDA and filtering, analysis of the media coverage, distribution of the quotes according to their valence and to the fame of the speaker
-* [@camillefrayssinhes](https://github.com/camillefrayssinhes): Quotebank EDA and filtering, sentimental analysis, writing up the README and the datastory for the website
+* [@camillefrayssinhes](https://github.com/camillefrayssinhes): Quotebank EDA and filtering, analysis of the influence of public opinion on the stock market, sentimental analysis, writing up the README and the datastory for the website
 * [@gaspardvilla](https://github.com/gaspardvilla): Wikipedia API recover the annual number of page views for each speaker, analysis of the stock market according to the fame of the speaker 
-* [@raphaelattias](https://github.com/raphaelattias) : Yahoo Finance API EDA and filtering, create the website, analysis of the stock market according to the valence of the quotes
+* [@raphaelattias](https://github.com/raphaelattias) : Yahoo Finance API EDA and filtering, analysis of fluctuations of the stock market according to the media coverage, building a model for stock market prediction, create the website
 
 *** 
 ### Code Architecture
