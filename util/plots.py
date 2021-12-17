@@ -186,7 +186,7 @@ def plot_wordcloud(text, path = 'figures/wordcloud.png', mask = False):
         mask = np.array(Image.open("figures/apple_logo_black.png"))
         wordcloud = WordCloud(height=2000, width=2000, mode = "RGBA", mask = mask,
                 background_color = "White",
-                stopwords = stopwords, colormap="gist_gray_r").generate(comment_words)
+                stopwords = stopwords, colormap="bone").generate(comment_words)
     else:
         wordcloud = WordCloud(height=2000, width=1000, mode = "RGBA",
                         background_color = "White",
