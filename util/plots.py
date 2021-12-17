@@ -152,7 +152,7 @@ def plot_wordcloud_speakers(quotes, speakers_pageviews, path = 'figures/wordclou
 # ----------------------------------------------------------------- #
 
 
-def plot_wordcloud(text, path = 'figures/wordcloud.png'): 
+def plot_wordcloud(text, path = 'figures/wordcloud.png', mask = False): 
     """
     Plot a Word Cloud for representing text data in which the size of each word indicates its frequency or importance.
 
@@ -174,10 +174,17 @@ def plot_wordcloud(text, path = 'figures/wordcloud.png'):
 
 
         comment_words += " ".join(tokens)+" "
-    
-    wordcloud = WordCloud(height=2000, width=1000, mode = "RGBA",
-                    background_color = "White",
-                    stopwords = stopwords, colormap="copper").generate(comment_words)
+
+    mask = np.array(Image.open("figures/apple_logo_black.png"))
+
+    if mask:
+        wordcloud = WordCloud(height=2000, width=1000, mode = "RGBA", mask = mask,
+                background_color = "White",
+                stopwords = stopwords, colormap="copper").generate(comment_words)
+    else:
+        wordcloud = WordCloud(height=2000, width=1000, mode = "RGBA",
+                        background_color = "White",
+                        stopwords = stopwords, colormap="copper").generate(comment_words)
 
     # plot the WordCloud image                      
     plt.figure(figsize = (8,16), facecolor = None)

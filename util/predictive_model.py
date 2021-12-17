@@ -8,7 +8,17 @@ import pandas as pd
 from tqdm.notebook import tqdm
 import plotly.graph_objects as go
 
-def build_prediction_frame(stock,quotes_sentiment = None):
+def build_prediction_frame(stock, quotes_sentiment = None):
+  """ Build the prediction dataframe for Prophet using stock and semantic quote features. 
+
+  Args:
+      stock (pd.Datframe): Dataframe provided by yFinance of various stock features.
+      quotes_sentiment (pd.Dataframe, optional): Dataframe on day index with sentiment features. Defaults to None.
+
+  Returns:
+      pd.Dataframe: Dataframe on day index with stock and sentiment features
+  """
+
 
   if (quotes_sentiment).any()[0]:
     quotes_sentiment = quotes_sentiment.groupby(quotes_sentiment.date.dt.date).sum()
@@ -27,6 +37,15 @@ def build_prediction_frame(stock,quotes_sentiment = None):
   return prediction_frame
 
 def times_series_predict(stock, quotes_sentiment = None, features = None, response = 'Open'):
+  """ Performs a prediction on incrementally bigger trainset. This function is useful to observe how much powerful and explicative \
+    the model gets as we increase the size of its trainset.
+
+  Args:
+      stock (pd.Datframe): Dataframe provided by yFinance of various stock features.
+      quotes_sentiment (pd.Dataframe, optional): Dataframe on day index with sentiment features. Defaults to None.
+      features (list[string], optional): List of features from quotes_sentiment to use for the predictive model. Defaults to None.
+      response (str, optional): Response variable to predict. Defaults to 'Open'.
+  """
   tscv = TimeSeriesSplit()
   figs = []
   prediction_frame = build_prediction_frame(stock,quotes_sentiment)
@@ -39,8 +58,15 @@ def times_series_predict(stock, quotes_sentiment = None, features = None, respon
     fig = plot_plotly(m,pred)
     figs.append(fig)
 
-def prophet_cross_validation(param_grid, stock, quotes_sentiment = None, features = None,response = 'Open', metric = 'mape'):
+def prophet_cross_validation(param_grid, stock, quotes_sentiment = None, metric = 'mape'):
+  """ Performs time series cross validation to find the best set of features for the prophet model
 
+  Args:
+      param_grid (dict[key: list]): Dictionnary of the parameters to evaluate 
+      stock ([type]): [description]
+      quotes_sentiment ([type], optional): [description]. Defaults to None.
+      metric (str, optional): [description]. Defaults to 'mape'.
+  """
     # Generate all combinations of parameters
   all_params = [dict(zip(param_grid.keys(), v)) for v in itertools.product(*param_grid.values())]
   prediction_frame = build_prediction_frame(stock,quotes_sentiment)
@@ -62,7 +88,18 @@ def prophet_cross_validation(param_grid, stock, quotes_sentiment = None, feature
   return tuning_results
 
 
-def fit_prophet(m, prediction_frame, features=None, response='Open', params = None):
+def fit_prophet(m, prediction_frame, features=None, response='Open'):
+  """ Fit the weights of the Prophet model given a certain prediction frame.
+
+  Args:
+      m (Prophet): Prophet model
+      prediction_frame (pd.Dataframe): Dataframe of features and response variable to predict.
+      features (list[string], optional): List of features from quotes_sentiment to use for the predictive model. Defaults to None.
+      response (str, optional): Response variable to predict. Defaults to 'Open'.
+
+  Returns:
+      Prophet: returns fitted model
+  """
   prediction_frame.rename({'date':'ds', response:'y'},axis=1,inplace=True)
   if features:
     for feature in features:
@@ -72,17 +109,37 @@ def fit_prophet(m, prediction_frame, features=None, response='Open', params = No
   return m
 
 def predict_future(m, prediction_frame, feature_frame = None):
-    future = m.make_future_dataframe(periods=300)
+  """ Given a Prophet model, provides a prediction on the next 300 days. This method can be used in junction with a set
+  of additional regressor passed in feature_frame.
+
+  Args:
+      m (Prophet): Prophet model
+      prediction_frame (pd.Dataframe): Dataframe of features and response variable to predict.
+      feature_frame (pd.Dataframe, optional): Dataframe of additional future regressors. Defaults to None.
+
+  Returns:
+      pd.Dataframe: Future prediction by Prophet
+  """
     
-    if feature_frame.any()[0]:
-      feature_frame = feature_frame.rename({'date':'ds', 'Date':'ds'},axis=1)
-      future = future.merge(feature_frame,left_on='ds',right_on='ds')
+  future = m.make_future_dataframe(periods=300)
+  
+  if feature_frame.any()[0]:
+    feature_frame = feature_frame.rename({'date':'ds', 'Date':'ds'},axis=1)
+    future = future.merge(feature_frame,left_on='ds',right_on='ds')
 
-    forecast = m.predict(future)
+  forecast = m.predict(future)
 
-    return forecast
+  return forecast
+
 
 def plot_prediction(stock, quotes_sentiment, pred):
+  """ Plot the prediction made by prophet
+
+  Args:
+      stock (pd.Dataframe): Dataframe of stock features
+      quotes_sentiment (pd.Dataframe): Dataframe of sentiment and quote features
+      pred (pd.Dataframe): Dataframe of prediction made by Prophet
+  """
     prediction_frame = build_prediction_frame(stock[stock.Date.dt.year.isin(range(2015,2019))],quotes_sentiment)
     df = prediction_frame[['date','Open']].merge(pred[['ds','yhat_lower','yhat_upper', 'yhat']],left_on="date",right_on="ds")
 
@@ -120,4 +177,3 @@ def plot_prediction(stock, quotes_sentiment, pred):
     fig.show()
 
     fig.write_html('figures/future_stock_prediction.html')
-
