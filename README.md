@@ -1,8 +1,12 @@
-# Influence of the Media on Apple Stock Market
+# What is the role of the media coverage in explaining stock market fluctuations?
+
+The full data story can be found [here](https://thepandariders.com/). Enjoy!
+
+![Wordcloud](/figures/wordcloud.png)
 
 ### Abstract and research questions
 
-Apple has been a market leader in the world of technology ever since the launch of its first product. Furthermore, media are more and more being used to study their impact on stock market movements. In this project, we aim to show that the rises and falls in stock prices of Apple correlate to the extent that people are talking about Apple in the media, the fame of the speakers and the way they are talking about the company. Firstly, we will wonder what is the role of the media coverage in explaining stock market fluctuations ? Then, we will examine who are the individuals who have influence over potential customers, and do these influencers have an impact on the company image and eventually, on the stock market ? Eventually, we will ask what is the influence of the people's opinions about Apple expressed in the media on the stock market ?
+Apple has been a market leader in the world of technology ever since the launch of its first product. Furthermore, media are more and more being used to study their impact on stock market movements. In this project, we aim to show that the rises and falls in stock prices of Apple correlate to the extent that people are talking about Apple in the media, the way people are talking about the company, and the fame of the speakers. Firstly, we will wonder what is the role of the media coverage in explaining stock market fluctuations? Then, we will examine what is the influence of the people's opinions about Apple expressed in the media on the stock market? Eventually, we will add a last level of complexity and we will ask who are the individuals who have influence over potential customers, and do these notorious influencers have an impact on the company image and eventually, on the stock market?
 
 ***
 ### Data sets used : 
@@ -11,48 +15,47 @@ Apple has been a market leader in the world of technology ever since the launch 
 * `Yahoo Finance API` : Eventually, we use the Yahoo Finance API to recover informations about the stock markets. This API provides quick and easy access to finance metrics for any stock or index. Among the many financial metrics available we decided to focus on the daily stock price and volume. The former will be an indicator of the long term health of the stock, and the latter of the daily volatility it may experience. In this milestone we compare the Apple stock ($AAPL) to the S&P500 ($SPY) from 2008 until 2020, which is is a stock market index tracking the performance of 500 large companies listed on stock exchanges in the US. We have chosen this equity index as it is one of the most tracked indices and generally an indicator of the overall health of the US stock market.
 
 ***
-### Methods : 
-* **Method to classify the fame of people annually :** For the subtask 2, we classify people as having a significant influence or a low influence over potential customers based on the Wikipedia page view statistics per year. We set the threshold at 10 000 page views per year, i.e. if people have more than 10 000 page views on their Wikipedia page one specific year, they will be considered as having a significant influence over customers on that year. For this specific subtask - and only for this one - we won’t consider the quotes for which the speakers are non identified (classified as ‘none’).   
-* **Methods to determine the author's opinion from a piece of text :** For the subtask 3, we apply sentiment analysis to the quotebank dataset to judge the opinion and the type of sentiments expressed in the quotes. The quotes are classified into three categories : positive, negative and neutral. To do so, we will use a machine learning model pre-trained (https://github.com/cardiffnlp/tweeteval) for sentiment analysis called [roBERTa](https://arxiv.org/pdf/2010.12421.pdf). This model has been trained on approximately 58 millions tweets to predict their sentiments, and reached the best results out of a wide range of complex models. We then analyze the correlation between stock market movements of Apple company and sentiments expressed in the quotes. 
-
+### Methods :
+* **Method to determine the author's opinion from a piece of text:** In order to determine the valence of the quotations, we apply sentiment analysis to the quotebank dataset to judge the opinion and the type of sentiments expressed in the quotes. The quotes are classified into three categories : positive, negative and neutral. To do so, we will use a machine learning model called [VADER Sentiment Analysis](https://github.com/cjhutto/vaderSentiment). We then analyze the correlation between the stock prices of Apple company and the sentiments expressed in the quotes.  
+* **Method to classify the fame of people annually:** In order to determine if the different speakers are poorly influential, moderately influential or highly influential, we attribute them a fame score based on the Wikipedia page view statistics per year. For this specific analysis, we consider only the quotes since 2015 as we only have access to the Wikipedia statistics since 2015, and we won’t consider the quotes for which the speakers are non identified (classified as ‘none’).
+* **Method to predict the stock price:** ty. We will use the [Facebook's Prophet library](https://facebook.github.io/prophet/), which provides powerful and easy to use forecasting tools. At its core, the model is a modular linear regression model, that can take into account past performance and additional factors. 
 
 ***
 ### Proposed timeline : 
-**Week 8 :** *(12/11 : P2 due)*
 
-**Week 9 :** Begin subtasks 1 and 2 (What is the role of the media coverage in explaining stock market fluctuations ? Who are the individuals who have influence over potential customers, and do these influencers have an impact on the Apple company image and eventually, on the stock market ?)
-
-**Week 10 :** Finish subtasks 1 and 2.
-
-**Week 11 :** Subtask 3 (What is the influence of the public opinions or emotions about Apple expressed in the media on the stock market ?) 
-
-**Week 12 :** Create a website with interactive graphs for our data story. Write the README. 
-
-**Week 13 :** Finalize the website, the notebook, the code architecture and the README. *(17/12 : P3 due)*
+![Timeline](/figures/Timeline.png)
 
 ***
 ### Organization within the team : 
-* [@Bapitou](https://github.com/Bapitou) : Quotebank EDA and filtering (Week 8 P2), task 1 (Week 9-10), task 3 (Week 11), finalize the website (Week 12-13)
-* [@camillefrayssinhes](https://github.com/camillefrayssinhes): Quotebank EDA and filtering (Week 8 P2), task 2 (Week 9-10), Writing up the README and the datastory for the website (Week 11-12-13)
-* [@gaspardvilla](https://github.com/gaspardvilla): Wikipedia API recover the annual number of page views for each speaker (Week 8 M2, Week 9), task 2 (Week 9-10), task 3  (Week 11), finalize the website (Week 12-13)
-* [@raphaelattias](https://github.com/raphaelattias) : Yahoo Finance API EDA and filtering (Week 8 P2), task 1 (Week 9-10), create the website (Week 11-12)
+* [@Bapitou](https://github.com/Bapitou) : Quotebank EDA and filtering, analysis of the media coverage, distribution of the quotes according to their valence and to the fame of the speaker
+* [@camillefrayssinhes](https://github.com/camillefrayssinhes): Quotebank EDA and filtering, sentimental analysis, writing up the README and the datastory for the website
+* [@gaspardvilla](https://github.com/gaspardvilla): Wikipedia API recover the annual number of page views for each speaker, analysis of the stock market according to the fame of the speaker 
+* [@raphaelattias](https://github.com/raphaelattias) : Yahoo Finance API EDA and filtering, create the website, analysis of the stock market according to the valence of the quotes
 
 *** 
 ### Code Architecture
 #### Quotebank 
-`dataloader.py` : loading and filtering the quotebank dataset according to our needs 
+`util/dataloader.py`: loading and filtering the quotebank dataset according to our needs 
 
-`quotebankexploration.py` : performing EDA of the quotebank dataset before and after filtering 
+`util/quotebankexploration.py` : performing EDA of the quotebank dataset before and after filtering 
 #### Yahoo Finance 
-`finance.py` : performing EDA of the Yahoo Finance dataset 
-#### Wikipedia
-`wikipedia.py` : pre-processing of the wikidata 
+`util/finance.py`: performing EDA of the Yahoo Finance dataset 
 
-`query_wikidata_dump.py` : recovering additional metadata about the speakers in the Quotebank dataset (identified with their QIDs) 
+`util/apple_stores.py`: set of utilities to plot the Apple store map (scrapper, coordinates, etc.)
+#### Sentiment Analysis
+`util/sentiment_analysis.py`: determining the valence of the quotes
+#### Wikipedia
+`util/wikipedia.py`: pre-processing of the wikidata 
+
+`util/query_wikidata_dump.py`: recovering additional metadata about the speakers in the Quotebank dataset (identified with their QIDs) 
+#### Building a predictive model
+`util/predictive_model.py`: builing a predictive model for the stock market
 #### Plots
-`plots.py` : visualizing the graphs 
+`util/plots.py`: visualizing the graphs 
 #### Jupyter Notebook
-`main.ipynb` : EDA and filtering of the datasets we use, subtasks analyses 
+`notebooks/final_submission.ipynb`: EDA and filtering of the datasets we use, subtasks analyses 
+
+`notebooks/milestone2.ipynb`: Milestone 2 deliverable
 
 
 
