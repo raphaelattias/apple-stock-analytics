@@ -1,22 +1,12 @@
 from prophet import Prophet
 import pandas as pd
-from prophet.plot import plot_plotly, plot_components_plotly
-import plotly.io as pio
 from prophet.diagnostics import cross_validation
 from prophet.diagnostics import performance_metrics
 from sklearn.model_selection import TimeSeriesSplit
-from prophet.plot import plot_cross_validation_metric
-# Python
 import itertools
-import numpy as np
 import pandas as pd
 from tqdm.notebook import tqdm
 import plotly.graph_objects as go
-
-import os
-import sys
-import logging
-import warnings
 
 def build_prediction_frame(stock,quotes_sentiment = None):
 
