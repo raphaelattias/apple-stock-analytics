@@ -661,41 +661,6 @@ def get_score_quotes(quotes, speakers_pageviews):
 # ----------------------------------------------------------------- #
 
 
-def get_pageviews_per_year(page, year):
-    """This function 
-
-    Args:
-        page ([type]): [description]
-        year ([type]): [description]
-
-    Returns:
-        [type]: [description]
-    """
-
-    nb_page_views = None
-
-    if str(page) != 'None':
-        # Time line
-        begin = str(year) + '0101'
-        end = str(year) + '1231'
-
-        # Get the data frame from wikipedia API
-        try:
-            df_wiki_api = pd.DataFrame(pageviewapi.per_article('en.wikipedia', page, begin, end,
-                            access='all-access', agent='all-agents', granularity='monthly')['items'])
-        
-            # Get the number of page views
-            nb_page_views = df_wiki_api.views.sum()
-        except:
-             pass
-
-    # Return the results
-    return nb_page_views
-
-
-# ----------------------------------------------------------------- #
-
-
 def get_speakers_pageviews_per_year(speakers_labels):
     """
     This function add a new column for every year beween 2015 and 2020
@@ -715,7 +680,7 @@ def get_speakers_pageviews_per_year(speakers_labels):
     # Loop along the years between 2015 and 2020
     for year in range(2015, 2021):
         # Add the new column for every year
-        speakers_pageviews[str(year)] = speakers_pageviews.label.apply(lambda label: get_pageviews_per_year(label, year))
+        speakers_pageviews[str(year)] = speakers_pageviews.label.apply(lambda label: get_page_views_per_year(label, year))
 
     # Return the final dataframe
     return speakers_pageviews
@@ -725,8 +690,24 @@ def get_speakers_pageviews_per_year(speakers_labels):
 
 
 def get_sentiment_quotes(quotes):
+    """
+    This function add a new column sentiment to our dataframe 
+    representing the valence of each quotes as a value among {-1, 0, +1}.
+
+    Args:
+        quotes (dataframe): contains all the quotes
+
+    Returns:
+        [dataframe]: new dataframe with added column sentiement
+    """
+
+    # Copy the dataframe
     quotes_sentiment = quotes.copy()
+
+    # Add the new column
     quotes_sentiment['sentiment'] = quotes_sentiment.quotation.progress_apply(sentiment_binary)
+
+    # Return the dataframe
     return quotes_sentiment
 
 
@@ -734,9 +715,26 @@ def get_sentiment_quotes(quotes):
 
 
 def pos_score(row):
+    """
+    This function return the score (in positive value) if the sentiment
+    is positive (ie equal to +1).
+
+    Args:
+        row (row of dataframe): row that contains the sentiment of the
+        quote.
+
+    Returns:
+        [integer]: return the score.
+    """
+
+    # Set the score equal to zero
     score = 0
+
+    # Update the score if the sentiment is positive
     if row.sentiment > 0:
         score = row.score
+
+    # Return the result
     return score
 
 
@@ -744,9 +742,26 @@ def pos_score(row):
 
 
 def neg_score(row):
+    """
+    This function return the score (in negative value) if the sentiment
+    is negative (ie equal to -1).
+
+    Args:
+        row (row of dataframe): row that contains the sentiment of the
+        quote.
+
+    Returns:
+        [integer]: return the score.
+    """
+
+    # Set the score equal to zero
     score = 0
+
+    # Update the score if the sentiment is negative
     if row.sentiment < 0:
-        score = -row.score
+        score = row.score
+
+    # Return the result
     return score
 
 
@@ -754,9 +769,27 @@ def neg_score(row):
 
 
 def get_neg_pos_score_quotes(quotes):
+    """
+    This function add the new columns negative and positive score for
+    every quotes.
+
+    Args:
+        quotes (dataframe): contains all the quotes with the score and
+        sentiment.
+
+    Returns:
+        [Dataframe]: new dataframe with columns negative and positive 
+        score.
+    """
+
+    # Copy the dataframe
     quotes_pos_neg_score = quotes.copy()
+
+    # Add the new columns for positive and negative score
     quotes_pos_neg_score['positive_score'] = quotes_pos_neg_score.apply(pos_score, axis = 1)
     quotes_pos_neg_score['negative_score'] = quotes_pos_neg_score.apply(neg_score, axis = 1)
+
+    # Return the new dataframe
     return quotes_pos_neg_score
 
 
@@ -764,13 +797,73 @@ def get_neg_pos_score_quotes(quotes):
 
 
 def get_score_date(quotes):
+    """
+    This function sum all the positive and negative score for every
+    days. It will be the dataframe used for the final plot.
+
+    Args:
+        quotes (dataframe): contains positive / negative score
+
+    Returns:
+        [dataframe]: new dataframe with positive / negative score
+        by days.
+    """
+
+    # Copy the dataframe 
     score_date = quotes.copy()
+
+    # Groupby days and keep the only columns we want
     score_date = score_date[['date', 'positive_score', 'negative_score']].dropna().groupby(['date']).sum()
+
+    # Reset indices and sort in incresing order for days
     score_date = score_date.reset_index(drop = False)
     score_date = score_date.sort_values(by="date")
     score_date = pd.DataFrame(score_date.groupby(score_date.date.dt.date).sum())
     score_date = score_date.reset_index(drop = False)
+
+    # Return the final dataframe
     return score_date
+
+
+# ----------------------------------------------------------------- #
+
+
+def correlation_stock_sentiment(score_date, stock):
+    """
+    This function computes the correlation coefficients for negative 
+    and positive score against stock liquidity.
+
+    Args:
+        score_date (dataframe): contains postive / negative score 
+        per days.
+        stock (dataframe): contains liquidity of the Apple stock
+    """
+
+    # Copy the dataframe
+    pos_per_day = score_date.copy()
+
+    # Correlation positive score
+    pos_per_day = pos_per_day.drop('negative_score', axis = 1)
+    pos_per_day.rename({'date': 'Date'}, axis=1, inplace=True)
+    pos_per_day['Date']= pd.to_datetime(pos_per_day['Date'], errors='coerce')
+    stock_to_keep_pos = stock[stock.Date.isin(set(stock.Date).intersection(set(pos_per_day.Date)))]
+    pos_per_day_to_keep = pos_per_day[pos_per_day.Date.isin(set(stock.Date).intersection(set(pos_per_day.Date)))]
+
+    # Print the pearson
+    print("Pearson positive score :", pearsonr(stock_to_keep_pos.Liquidity, pos_per_day_to_keep.positive_score))
+
+    # Copy the dataframe
+    neg_per_day = score_date.copy()
+
+    # Correlation negative score
+    neg_per_day = neg_per_day.drop('positive_score', axis = 1)
+    neg_per_day.rename({'date': 'Date'}, axis=1, inplace=True)
+    neg_per_day['Date']= pd.to_datetime(neg_per_day['Date'], errors='coerce')
+    stock_to_keep_neg = stock[stock.Date.isin(set(stock.Date).intersection(set(neg_per_day.Date)))]
+    neg_per_day_to_keep = neg_per_day[neg_per_day.Date.isin(set(stock.Date).intersection(set(neg_per_day.Date)))]
+    
+    # Print the pearson
+    print("Pearson negative score :", pearsonr(stock_to_keep_neg.Liquidity, neg_per_day_to_keep.negative_score))
 
 
 # ----------------------------------------------------------------- #
