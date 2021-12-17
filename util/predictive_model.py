@@ -62,10 +62,10 @@ def prophet_cross_validation(param_grid, stock, quotes_sentiment = None, metric 
   """ Performs time series cross validation to find the best set of features for the prophet model
 
   Args:
-      param_grid (dict[key: list]): Dictionnary of the parameters to evaluate 
-      stock ([type]): [description]
-      quotes_sentiment ([type], optional): [description]. Defaults to None.
-      metric (str, optional): [description]. Defaults to 'mape'.
+      param_grid (dict[key: list]): Dictionnary of the parameters to evaluate.
+      stock (pd.Datframe): Dataframe provided by yFinance of various stock features.
+      quotes_sentiment (pd.Dataframe, optional): Dataframe on day index with sentiment features. Defaults to None.
+      metric (str, optional): Metric to use to evaluate the best parameters. Defaults to 'mape'.
   """
     # Generate all combinations of parameters
   all_params = [dict(zip(param_grid.keys(), v)) for v in itertools.product(*param_grid.values())]

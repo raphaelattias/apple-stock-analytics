@@ -9,6 +9,8 @@ import plotly.express as px
 import numpy as np
 
 def fig_world():
+  """Produces a plotly map world of all the Apple Stores scrapped, and saves it to html.
+  """
   df = pd.read_pickle('data/apple_stores/stores.pkl')
   fig = go.Figure(go.Scattergeo(lat=df['latitude'],
                                 lon=df['longitude'], 
@@ -80,6 +82,8 @@ def fig_world():
 
 
 def find_stores():
+  """Scraps the apple stores locations and saves a dataframe of name and coordinates.
+  """
   geolocator = Nominatim(user_agent='raphael.attias@outlook.com')
   lat = []
   lon = []

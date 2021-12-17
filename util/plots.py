@@ -126,6 +126,12 @@ def plot_numOcc_per_day(quote_df, year):
 # ----------------------------------------------------------------- #
 
 def plot_wordcloud_speakers(quotes, speakers_pageviews, path = 'figures/wordcloud_speakers.png'):
+    """
+    Plot a Word Cloud for representing speakers data in which the size of each speaker indicates its frequency or importance.
+
+    Inputs:
+        * text (pd.Series): text dataset used for generating the word cloud 
+    """
     def speakers_long_string(speaker,num):
         string = ""
         for i in range(num):

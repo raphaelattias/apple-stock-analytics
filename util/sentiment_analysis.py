@@ -22,7 +22,14 @@ def sentiment_score(quote) :
 
 
 def predict_sentiment(quotes):
+    """ Predict the sentiment of quotes in a quotes dataframes. The sentiment is either positive, neutral or negative.
 
+    Args:
+        quotes (pd.Dataframe): Dataframe of quotes that must contain a "quotation" column.
+
+    Returns:
+        pd.Dataframe:  Dataframe of quotes with a sentiment column
+    """
     new_quotes = quotes.copy()
     new_quotes.rename({'quotation': 'Quotation'}, axis = 1, inplace=True)
     
@@ -51,6 +58,12 @@ def predict_sentiment(quotes):
 
 
 def correlation_stock_sentiment(quotes,stock):
+    """Computes the correlation between predicted sentiment on quotes and the stock liquidity.
+
+    Args:
+        quotes (pd.Datframe): Dataframe of quotes.
+        stock (pd.Datframe): Dataframe provided by yFinance of various stock features.
+    """
     # separate the positive and negative quotes
     pos_quotes = quotes[quotes['sentiment'] == 'positive']
     neg_quotes = quotes[quotes['sentiment'] == 'negative']
@@ -127,6 +140,13 @@ def sentiment_binary(quote) :
 
 
 def fig_all_sentiments(quotes,stock):
+    """Plot various figures to compare sentiment on quotes with the stock price.
+
+    Args:
+        quotes (pd.Datframe): Dataframe of quotes.
+        stock (pd.Datframe): Dataframe provided by yFinance of various stock features.
+    """
+    
     stock_name = "AAPL"
     # separate the positive and negative quotes
     pos_quotes = quotes[quotes['sentiment'] == 'positive']
