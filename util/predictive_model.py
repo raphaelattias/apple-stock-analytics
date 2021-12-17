@@ -140,40 +140,40 @@ def plot_prediction(stock, quotes_sentiment, pred):
       quotes_sentiment (pd.Dataframe): Dataframe of sentiment and quote features
       pred (pd.Dataframe): Dataframe of prediction made by Prophet
   """
-    prediction_frame = build_prediction_frame(stock[stock.Date.dt.year.isin(range(2015,2019))],quotes_sentiment)
-    df = prediction_frame[['date','Open']].merge(pred[['ds','yhat_lower','yhat_upper', 'yhat']],left_on="date",right_on="ds")
+  prediction_frame = build_prediction_frame(stock[stock.Date.dt.year.isin(range(2015,2019))],quotes_sentiment)
+  df = prediction_frame[['date','Open']].merge(pred[['ds','yhat_lower','yhat_upper', 'yhat']],left_on="date",right_on="ds")
 
-    fig = go.Figure()
+  fig = go.Figure()
 
-    # Add traces
-    fig.add_trace(go.Scatter(x=df.ds, y=df.Open,
-                        mode='markers',
-                        name='True Price'))
-    fig.add_trace(go.Scatter(x=df.ds, y=df.yhat,
-                        mode='lines',
-                        name='Predicted Price',
-                        marker_color='rgb(50,90,200)'))
+  # Add traces
+  fig.add_trace(go.Scatter(x=df.ds, y=df.Open,
+                      mode='markers',
+                      name='True Price'))
+  fig.add_trace(go.Scatter(x=df.ds, y=df.yhat,
+                      mode='lines',
+                      name='Predicted Price',
+                      marker_color='rgb(50,90,200)'))
 
-    fig.add_trace(go.Scatter(x=df.ds, y=df.yhat_upper,
-                        mode='lines',
-                        name='Lower Prediction',
-                        marker_color='rgb(165,37,30)'))
-                        
-    fig.add_trace(go.Scatter(x=df.ds, y=df.yhat_lower,
-                        mode='lines',
-                        name='Upper Prediction',
-                        marker_color='rgb(50,120,70)',
-                        fillcolor='rgba(68, 68, 68, 0.3)',
-                        fill='tonexty'))
+  fig.add_trace(go.Scatter(x=df.ds, y=df.yhat_upper,
+                      mode='lines',
+                      name='Lower Prediction',
+                      marker_color='rgb(165,37,30)'))
+                      
+  fig.add_trace(go.Scatter(x=df.ds, y=df.yhat_lower,
+                      mode='lines',
+                      name='Upper Prediction',
+                      marker_color='rgb(50,120,70)',
+                      fillcolor='rgba(68, 68, 68, 0.3)',
+                      fill='tonexty'))
 
-    fig.add_vline(x='2018-01-01', line_width=2, line_dash="dash", line_color="black")
+  fig.add_vline(x='2018-01-01', line_width=2, line_dash="dash", line_color="black")
 
-    fig.update_layout(
-                    template = 'ggplot2',
-                    yaxis_title="Stock Price [$]",
-                    xaxis_title = "Date",
-                    title = "Fitted model between 2015 and 2017, and predicted on 2018 for Apple stock price"
-                    )
-    fig.show()
+  fig.update_layout(
+                  template = 'ggplot2',
+                  yaxis_title="Stock Price [$]",
+                  xaxis_title = "Date",
+                  title = "Fitted model between 2015 and 2017, and predicted on 2018 for Apple stock price"
+                  )
+  fig.show()
 
-    fig.write_html('figures/future_stock_prediction.html')
+  fig.write_html('figures/future_stock_prediction.html')

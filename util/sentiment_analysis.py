@@ -223,10 +223,10 @@ def fig_all_sentiments(quotes,stock):
         updatemenus=[
             dict(
                 type="buttons",
-                direction="right",
+                direction="up",
                 active=0,
-                x=1,
-                y=1.15,
+                x=0.99,
+                y=0.97,
                 buttons=list([
                     dict(label="All quotes",
                         method="update",
@@ -251,6 +251,7 @@ def fig_all_sentiments(quotes,stock):
     # Set title
     fig.update_layout(
         title_text="<b>Distribution of all quotes (cumulative positive and negative) along the years </b>",
+        title_y=0.92,
         xaxis_domain=[0.05, 1.0],
         yaxis_range =[0,ymax],
         xaxis_title_text='Date', # xaxis label
@@ -337,6 +338,7 @@ def fig_all_sentiments(quotes,stock):
     # Set title
     fig.update_layout(
         title_text="Distribution of the negative quotes against the Apple stock price along the years",
+        title_y=1,
         xaxis_domain=[0.05, 1.0],
         yaxis_range =[0,ymax],
         xaxis_title_text='Date', # xaxis label
